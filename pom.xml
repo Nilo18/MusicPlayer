@@ -47,17 +47,31 @@
       <version>2.10.1</version>
   </dependency>
 
-  <dependency>
-      <groupId>com.github.sealedtx</groupId>
-      <artifactId>java-youtube-downloader</artifactId>
-      <version>3.1.0</version>
-  </dependency>
+      <dependency>
+          <groupId>io.github.gaeqs</groupId>
+          <artifactId>JavaYoutubeDownloader</artifactId>
+          <version>1.2.3</version>
+      </dependency>
 
-  <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-controls</artifactId>
-      <version>23.0.1</version>
-  </dependency>
+      <dependency>
+          <groupId>com.github.sealedtx</groupId>
+          <artifactId>java-youtube-downloader</artifactId>
+          <version>3.3.1</version>
+      </dependency>
+
+
+      <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <version>23.0.1</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-java</artifactId>
+          <version>4.24.0</version>
+      </dependency>
+
   <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-media</artifactId>
@@ -88,6 +102,17 @@
       <version>1.43.3</version>
   </dependency>
 
+  <dependency>
+      <groupId>io.github.cdimascio</groupId>
+      <artifactId>dotenv-java</artifactId>
+      <version>3.0.0</version>
+  </dependency>
+
+  <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.17.2</version>
+  </dependency>
 
   </dependencies>
 </project>
