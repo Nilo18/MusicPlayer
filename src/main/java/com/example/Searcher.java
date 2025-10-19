@@ -55,12 +55,7 @@ public class Searcher {
 //                System.out.println("Downloading " + title + "...");
 
                 String url = "https://youtube-mp36.p.rapidapi.com/dl?id=" + video.getId().getVideoId();
-                // *********************************************
                 Downloader.downloadVideo(title, url);
-
-                System.out.println("Now playing:");
-                System.out.println("\nTitle: " + video.getSnippet().getTitle());
-                System.out.println("URL: https://www.youtube.com/watch?v=" + video.getId().getVideoId());
             } else {
                 System.out.println("No such video was found.");
             }
@@ -114,20 +109,28 @@ public class Searcher {
         } catch (InterruptedException err) {
             System.out.println("The search was interrupted: " + err);
             return;
+        } catch (IllegalArgumentException err) {
+            System.out.println("Invalid URL argument: " + err);
+            return;
         }
     }
 
     public static void search(String token) {
-        System.out.println("Downloading " + token + "...");
+//        System.out.println("Downloading " + token + "...");
         // If the user entering a URL extract the id of the video from it using Jsoup
         // Else search by the name using YouTube API
         if (token.contains("https://www.youtube.com/watch?v=")) {
+            System.out.println("Searching " + token + "...");
             String[] splitToken = token.split("v=");
             String queryParams = splitToken[1];
             int delimiterIndex = queryParams.indexOf("&");
             String id = queryParams.substring(0, delimiterIndex);
             searchByURL(id);
+        } else if (token.contains("https") && !token.contains("youtube")) {
+            System.out.println("Only youtube URLs are allowed.");
+            return;
         } else {
+            System.out.println("Searching " + token + "...");
             searchByKeyword(token);
         }
     }

@@ -11,7 +11,7 @@ public class App {
         // mp play -"name", mp loop, mp skip, mp exit
         // 1. Analyze the user input for commands
         System.out.println("******************");
-        System.out.println("MusicPlayer CLI");
+        System.out.println("MusicPlayer CLI v1.0");
         System.out.println("******************");
         System.out.println();
         System.out.println("Choose a command: ");
@@ -34,9 +34,10 @@ public class App {
             if (option.contains("mp play -")) {
                 String[] token = option.split("\"");
                 String musicName = token[1];
-                System.out.println("Searching " + musicName + "...");
                 Searcher.search(musicName);
-            } else if (option.contains("mp exit")) {
+            } else if (option.equals("mp loop")) {
+                System.out.println("Looping...");
+            } else if (option.equals("mp exit")) {
                 System.out.println("Exiting MusicPlayer...");
                 isRunning = false;
             } else {

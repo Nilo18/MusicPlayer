@@ -2,7 +2,6 @@ package com.example;
 
 import com.google.gson.*;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -18,6 +17,7 @@ public class Downloader {
     // url is used to create a valid URI string
     public static void downloadVideo(String title, String url) {
         HttpClient client = HttpClient.newHttpClient();
+        System.out.println("Downloading " + title + "...");
         try {
             HttpRequest req = HttpRequest.newBuilder().
                     uri(URI.create(url)).
@@ -32,12 +32,23 @@ public class Downloader {
             JsonElement rootElem = JsonParser.parseString(res.body());
             JsonObject rootObject = rootElem.getAsJsonObject();
 
+            String illegalCharactersRegex = "[\\\\/:*?\"<>|]";
+
+            // Replace all occurrences of these illegal characters with an underscore (_)
+            String safeTitle = title.replaceAll(illegalCharactersRegex, "_");
+
             String downloadLink = rootObject.get("link").getAsString();
             Path mpDir = Paths.get(System.getProperty("user.home"), "MpMusic");
-            if (!Files.exists(mpDir)) {
-                Files.createDirectories(mpDir);
+            Utilities.createDirectory(mpDir);
+            Path filePath = Paths.get(System.getProperty("user.home"), "MpMusic", safeTitle + ".mp3");
+            if (Files.exists(filePath)) {
+                System.out.println("The suggested music has already been downloaded.");
+                System.out.println("Opening it locally...");
+                Utilities.printCurrentMusic(title, url);
+                Utilities.openFile(filePath.toFile());
+                return;
             }
-            Path filePath = Paths.get(System.getProperty("user.home"), "MpMusic", title + ".mp3");
+
             HttpRequest downloadReq = HttpRequest.newBuilder().
                     uri(URI.create(downloadLink)).
                     GET().
@@ -45,17 +56,14 @@ public class Downloader {
             HttpResponse<Path> downloadRes = client.send(downloadReq, HttpResponse.BodyHandlers.ofFile(filePath));
             if (downloadRes.statusCode() == 200) {
                 System.out.println("Download was successful.");
+                Utilities.printCurrentMusic(title, url);
             } else {
                 System.out.println("Failed to download.");
+                return;
             }
             // Convert the file path to a File object so Desktop class can open it
             File fileToOpen = filePath.toFile();
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().open(fileToOpen);
-            } else {
-                System.err.println("Desktop operations (opening browser) are not supported on this system.");
-                System.out.println("Please copy and paste this link manually: " + downloadLink);
-            }
+            Utilities.openFile(fileToOpen);
         } catch (IOException e) {
             // Handle network errors (e.g., connection refused, timeout)
             System.err.println("IO exception: " + e.getMessage());
