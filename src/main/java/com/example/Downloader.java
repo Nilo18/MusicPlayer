@@ -1,6 +1,7 @@
 package com.example;
 
 import com.google.gson.*;
+import javafx.application.Platform;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,12 +14,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Downloader {
+    private static final Player player = new Player();
     // title is used to name the mp3 file after downloading
     // url is used to create a valid URI string
     public static void downloadVideo(String title, String url) {
         HttpClient client = HttpClient.newHttpClient();
         System.out.println("Downloading " + title + "...");
+        String illegalCharactersRegex = "[\\\\/:*?\"<>|]";
+
+        // Replace all occurrences of these illegal characters with an underscore (_)
+        String safeTitle = title.replaceAll(illegalCharactersRegex, "_");
+
+        Path filePath = Paths.get(System.getProperty("user.home"), "MpMusic", safeTitle + ".mp3");
+        // If the suggested music is already downloaded, play it directly and exit without making any HTTP reqs
+        if (Files.exists(filePath)) {
+            System.out.println("The suggested music has already been downloaded.");
+            System.out.println("Opening it locally...");
+            Utilities.printCurrentMusic(title, url);
+            Platform.runLater(() -> player.play(filePath));
+            return;
+        }
+        // If the music isn't downloaded, make an request to the youtube to mp3 API to download it
         try {
+//            System.out.println("I'm making a request...");
             HttpRequest req = HttpRequest.newBuilder().
                     uri(URI.create(url)).
                     header("x-rapidapi-key", AppConfig.getDotenvValue("DOWNLOADER_API_KEY")).
@@ -32,22 +50,11 @@ public class Downloader {
             JsonElement rootElem = JsonParser.parseString(res.body());
             JsonObject rootObject = rootElem.getAsJsonObject();
 
-            String illegalCharactersRegex = "[\\\\/:*?\"<>|]";
-
-            // Replace all occurrences of these illegal characters with an underscore (_)
-            String safeTitle = title.replaceAll(illegalCharactersRegex, "_");
 
             String downloadLink = rootObject.get("link").getAsString();
             Path mpDir = Paths.get(System.getProperty("user.home"), "MpMusic");
             Utilities.createDirectory(mpDir);
-            Path filePath = Paths.get(System.getProperty("user.home"), "MpMusic", safeTitle + ".mp3");
-            if (Files.exists(filePath)) {
-                System.out.println("The suggested music has already been downloaded.");
-                System.out.println("Opening it locally...");
-                Utilities.printCurrentMusic(title, url);
-                Utilities.openFile(filePath.toFile());
-                return;
-            }
+
 
             HttpRequest downloadReq = HttpRequest.newBuilder().
                     uri(URI.create(downloadLink)).
@@ -63,7 +70,9 @@ public class Downloader {
             }
             // Convert the file path to a File object so Desktop class can open it
             File fileToOpen = filePath.toFile();
-            Utilities.openFile(fileToOpen);
+            System.out.println("File exists? " + Files.exists(filePath));
+            System.out.println("Absolute path: " + filePath.toAbsolutePath());
+            Platform.runLater(() -> player.play(filePath));
         } catch (IOException e) {
             // Handle network errors (e.g., connection refused, timeout)
             System.err.println("IO exception: " + e.getMessage());

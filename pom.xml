@@ -14,6 +14,15 @@
                     <target>15</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>com.example.App</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <version>1.0-SNAPSHOT</version>
@@ -113,6 +122,24 @@
       <artifactId>jsoup</artifactId>
       <version>1.17.2</version>
   </dependency>
+
+  <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-base</artifactId>
+      <version>23.0.1</version>
+  </dependency>
+  <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <version>23.0.1</version>
+  </dependency>
+  <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-media</artifactId>
+      <version>23.0.1</version>
+  </dependency>
+
+
 
   </dependencies>
 </project>

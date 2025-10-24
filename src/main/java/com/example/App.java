@@ -1,12 +1,24 @@
 package com.example;
 
 import com.google.gson.*;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.stage.Stage;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
-public class App {
+public class App extends Application {
+    @Override
+    public void start(Stage stage) {
+//        Player player = new Player();
+//        Path p = Paths.get(System.getProperty("user.home"), "MpMusic", "Belisarius Epic Byzantine Music.mp3");
+//        player.play(p);
 
-    public static void main( String[] args ) {
-//        String[] allowedCommands = {""};
+        //        String[] allowedCommands = {""};
         // The allowed commands should be:
         // mp play -"name", mp loop, mp skip, mp exit
         // 1. Analyze the user input for commands
@@ -28,23 +40,21 @@ public class App {
 
         // 2. Search YouTube by the given keyword if the command is mp play
 
-        while (isRunning) {
-            String option = sc.nextLine();
+        Platform.setImplicitExit(false); // prevents JVM from exiting
 
-            if (option.contains("mp play -")) {
-                String[] token = option.split("\"");
-                String musicName = token[1];
-                Searcher.search(musicName);
-            } else if (option.equals("mp loop")) {
-                System.out.println("Looping...");
-            } else if (option.equals("mp exit")) {
-                System.out.println("Exiting MusicPlayer...");
-                isRunning = false;
-            } else {
-                System.out.println("Unrecognized command.");
-            }
-        }
+//        stage.setTitle("Hidden");
+//        stage.setWidth(0);
+//        stage.setHeight(0);
+//        stage.show(); // MUST show to initialize toolkit
 
+        Thread commandsThread = new Thread(new CliThread());
+        commandsThread.setDaemon(true); // optional: ensures JVM can exit if main thread ends
+        commandsThread.start();
+    }
+
+
+    public static void main( String[] args ) {
+        launch(args);
         // 3. Parse the first 5-10 results of the search using Gson
         // 4. Ask the user to choose between one of them by typing numbers 1-10
         // 5. Download the selected option using java-youtube-downloader, it should be stored in MpMusic folder

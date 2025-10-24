@@ -91,6 +91,7 @@ public class Searcher {
         String youtubeURL = "https://www.youtube.com/watch?v=" + id;
         HttpClient client = HttpClient.newHttpClient();
         try {
+            // Make a request to the given youtube music video page
             HttpRequest req = HttpRequest.newBuilder().
                     uri(URI.create(youtubeURL)).
                     header("User-Agent", "Mozilla/5.0").
@@ -98,9 +99,11 @@ public class Searcher {
 
             HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
             if (res.statusCode() == 200) {
+                // If the page was found parse the HTML and extract the title
                 String videoHTML = res.body();
                 String title = extractTitle(videoHTML);
 
+                // Make a request to the downloader API to download the video
                 Downloader.downloadVideo(title, url);
             }
         } catch (IOException err) {
