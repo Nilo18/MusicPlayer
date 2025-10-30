@@ -10,7 +10,6 @@ public class CliThread implements Runnable {
     public void run() {
         boolean isRunning = true;
         Scanner sc = new Scanner(System.in);
-        System.out.println("I'm running from CliThread.");
 
         while (isRunning) {
             String option = sc.nextLine();
@@ -20,7 +19,9 @@ public class CliThread implements Runnable {
                 String musicName = token[1];
                 Searcher.search(musicName);
             } else if (option.equals("mp loop")) {
-                System.out.println("Looping...");
+                Platform.runLater(() -> PlayerManager.loop());
+            } else if (option.equals("mp skip")) {
+                PlayerManager.skip();
             } else if (option.equals("mp exit")) {
                 System.out.println("Exiting MusicPlayer CLI...");
                 isRunning = false;

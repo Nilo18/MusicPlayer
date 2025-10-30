@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Downloader {
-    private static final Player player = new Player();
+//    private static final Player player = new Player();
     // title is used to name the mp3 file after downloading
     // url is used to create a valid URI string
     public static void downloadVideo(String title, String url) {
@@ -31,12 +31,11 @@ public class Downloader {
             System.out.println("The suggested music has already been downloaded.");
             System.out.println("Opening it locally...");
             Utilities.printCurrentMusic(title, url);
-            Platform.runLater(() -> player.play(filePath));
+            Platform.runLater(() -> PlayerManager.play(filePath));
             return;
         }
-        // If the music isn't downloaded, make an request to the youtube to mp3 API to download it
+        // If the music isn't downloaded, make a request to the youtube to mp3 API to download it
         try {
-//            System.out.println("I'm making a request...");
             HttpRequest req = HttpRequest.newBuilder().
                     uri(URI.create(url)).
                     header("x-rapidapi-key", AppConfig.getDotenvValue("DOWNLOADER_API_KEY")).
@@ -70,9 +69,8 @@ public class Downloader {
             }
             // Convert the file path to a File object so Desktop class can open it
             File fileToOpen = filePath.toFile();
-            System.out.println("File exists? " + Files.exists(filePath));
-            System.out.println("Absolute path: " + filePath.toAbsolutePath());
-            Platform.runLater(() -> player.play(filePath));
+            // Set javafx on its own thread
+            Platform.runLater(() -> PlayerManager.play(filePath));
         } catch (IOException e) {
             // Handle network errors (e.g., connection refused, timeout)
             System.err.println("IO exception: " + e.getMessage());

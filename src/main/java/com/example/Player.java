@@ -11,6 +11,7 @@ import java.util.Arrays;
 public class Player {
     private MediaPlayer player;
     private Queue queue = new Queue();
+    private boolean isLooped = false;
 
     public void play(Path musicPath) {
         if (player != null) {
@@ -29,7 +30,12 @@ public class Player {
 //        System.out.println("Here's the provided path as well: " + musicPath);
 
         // Add listener to the end of the music so it plays the next one in the queue
-        player.setOnEndOfMedia(this::playNext);
+        if (!isLooped) {
+            player.setOnEndOfMedia(this::playNext);
+        } else {
+            System.out.println("The current music is looped so I won't play the next one.");
+            return;
+        }
         player.setOnReady(() -> {
             player.seek(Duration.ZERO); // ensure playback starts from beginning
             player.play();
@@ -44,12 +50,36 @@ public class Player {
 //        });
     }
 
-    private void playNext() {
+    public void playNext() {
         Path nextMusic = queue.getNextMusic();
         if (nextMusic != null) {
             play(nextMusic);
         } else {
             System.out.println("Playlist finished.");
         }
+    }
+
+    public void loop() {
+        if (player != null) {
+            isLooped = true;
+            player.setOnEndOfMedia(() -> {
+                player.seek(Duration.ZERO);
+                player.play();
+            });
+        }
+        player.setCycleCount(MediaPlayer.INDEFINITE);
+        this.isLooped = true;
+    }
+
+    public Queue getQueue() {
+        return queue;
+    }
+
+    public void setLoopState(boolean val) {
+        this.isLooped = val;
+    }
+
+    public boolean isLooping() {
+        return isLooped;
     }
 }
