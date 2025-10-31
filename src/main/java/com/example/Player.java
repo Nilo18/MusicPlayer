@@ -44,10 +44,6 @@ public class Player {
             System.out.println("Media error: " + player.getError());
             if (player.getError() != null) player.getError().printStackTrace();
         });
-
-//        Platform.runLater(() -> {
-//            player.play();
-//        });
     }
 
     public void playNext() {
@@ -69,6 +65,37 @@ public class Player {
         }
         player.setCycleCount(MediaPlayer.INDEFINITE);
         this.isLooped = true;
+    }
+
+    public void pause() {
+        // Ensure that the player is properly initialized
+        if (player == null) {
+            System.out.println("No music to pause.");
+            return;
+        }
+        // Only pause if there is a music playing, this condition is handled in PlayerManager as well
+        // But PlayerManager is basically a wrapper of a single Player object and handles the condition
+        // only for that specific Player object, here we handle the case for all Player objects to ensure
+        // That none of them throw unexpected exceptions
+        MediaPlayer.Status status = player.getStatus();
+        if (status == MediaPlayer.Status.PLAYING) {
+            player.pause();
+            System.out.println("Music paused.");
+        }
+    }
+
+    public void resume() {
+        // If the player hasn't been initialized, exit prematurely to prevent nullptr errors
+        if (player == null) {
+            System.out.println("No music to resume.");
+            return;
+        }
+        MediaPlayer.Status status = player.getStatus();
+        // If the music isn't already playing, play it again
+        if (status != MediaPlayer.Status.PLAYING) {
+            player.play();
+            System.out.println("Music resumed.");
+        }
     }
 
     public Queue getQueue() {

@@ -1,11 +1,15 @@
 package com.example;
 
+import javafx.application.Platform;
+
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Utilities {
     public static boolean openingSupported() {
@@ -42,6 +46,25 @@ public class Utilities {
                 return;
             }
         }
+    }
+
+    public static void exit(AtomicBoolean isRunning) {
+        System.out.println("Exiting MusicPlayer CLI...");
+        isRunning.set(false);
+        Platform.exit(); // Exit javafx thread
+        System.exit(0); // Exit the JVM completely
+    }
+
+    public static void playMusic(String option) {
+        String[] token = option.split("\"");
+//        System.out.println("Token is: " + Arrays.toString(token));
+        String musicName = token[0];
+//        System.out.println("The music name is: " + musicName);
+        Searcher.search(musicName);
+    }
+
+    public static void loopMusic() {
+        Platform.runLater(() -> PlayerManager.loop());
     }
 
 }

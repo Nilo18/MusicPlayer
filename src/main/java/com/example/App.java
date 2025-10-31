@@ -48,7 +48,7 @@ public class App extends Application {
 //        stage.show(); // MUST show to initialize toolkit
 
         Thread commandsThread = new Thread(new CliThread());
-        commandsThread.setDaemon(true); // optional: ensures JVM can exit if main thread ends
+        commandsThread.setDaemon(true); // ensures JVM can exit if main thread ends
         commandsThread.start();
     }
 

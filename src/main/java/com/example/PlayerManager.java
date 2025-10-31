@@ -7,6 +7,7 @@ public class PlayerManager {
     private static final Player player = new Player();
 //    private static boolean isLooped = false;
     private static boolean musicPlaying = false;
+    private static boolean musicActive;
 
     public static void play(Path musicPath) {
         player.play(musicPath);
@@ -38,5 +39,19 @@ public class PlayerManager {
         } else {
             System.out.println("No music to skip.");
         }
+    }
+
+    public static void pause() {
+        if (musicPlaying) {
+            player.pause();
+            musicPlaying = false;
+        } else {
+            System.out.println("No music to pause.");
+        }
+    }
+
+    public static void resume() {
+        player.resume();
+        musicPlaying = true;
     }
 }
