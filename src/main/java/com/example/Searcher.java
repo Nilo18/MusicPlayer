@@ -129,9 +129,8 @@ public class Searcher {
             int delimiterIndex = queryParams.indexOf("&");
             String id = queryParams.substring(0, delimiterIndex);
             searchByURL(id);
-        } else if (token.contains("https") && !token.contains("youtube")) {
-            System.out.println("Only youtube URLs are allowed.");
-            return;
+        } else if (token.contains("https://") && !token.contains("www.youtube.com/watch?v=")) {
+            System.out.println("Only valid youtube video URLs are allowed.");
         } else {
             System.out.println("Searching " + token + "...");
             searchByKeyword(token);

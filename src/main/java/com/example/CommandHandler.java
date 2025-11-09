@@ -13,9 +13,9 @@ public class CommandHandler {
     }
 
     public static void executeCommand(String command) {
+        // Loop over the commands and test the user input against the syntax
+        // This ensures that syntax is always valid
         for (Command cmd : commands.values()) {
-            // Check the input against the regex syntax
-            // This ensures that syntax is always valid
             Matcher matcher = cmd.syntax.matcher(command);
 
             if (matcher.matches()) {

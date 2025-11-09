@@ -15,15 +15,38 @@ public class CliThread implements Runnable {
         AtomicBoolean isRunning = new AtomicBoolean(true);
         Scanner sc = new Scanner(System.in);
 
-        // Join the Object vararg array into a valid string
-        // Define a valid syntax with Pattern.compile()
-        // to ensure that the user uses the commands with the intended syntax
+        /*
+           Define a valid syntax with Pattern.compile()
+           to ensure that the user uses the commands with the intended syntax
+           ^ matches the start of the string and ensures the command always begins with mp
+           $ matches the end of the string and ensures that there are no other characters after the command
+           \" and \" match the start and the end of the search keyword
+           () inside define a capture group to store the keyword separately
+           [^\"]+ matches one or more quotes that are not a ".
+           Also join the Object vararg array into a valid string by creating a stream from an array of Objects
+           .map(Object::toString) converts each Object to its string representation
+           .toArray(String[]::new) collects the converted values into a new array
+           String.join(" ") is used to join the strings with spaces between them
+        */
         CommandHandler.addCommand("mp play", Pattern.compile("^mp play -\"([^\"]+)\"$"),
                 (Object... option) ->
                 Utilities.playMusic(String.join(" ", Arrays.stream(option)
                         .map(Object::toString)
                         .toArray(String[]::new)))
         );
+        CommandHandler.addCommand("mp forward", Pattern.compile("^mp forward -([^\"]+)$"),
+                (Object... option) ->
+                PlayerManager.forward(String.join(" ", Arrays.stream(option)
+                        .map(Object::toString)
+                        .toArray(String[]::new)))
+        );
+        CommandHandler.addCommand("mp rewind", Pattern.compile("^mp rewind -([^\"]+)$"),
+                (Object... option) ->
+                        PlayerManager.rewind(String.join(" ", Arrays.stream(option)
+                                .map(Object::toString)
+                                .toArray(String[]::new)))
+        );
+        // Starting with ^ and ending with $ means that there are no arguments expected
         CommandHandler.addCommand("mp loop", Pattern.compile("^mp loop$"),
                 (Object... a) -> Platform.runLater(PlayerManager::loop)
         );
@@ -39,10 +62,6 @@ public class CliThread implements Runnable {
         CommandHandler.addCommand("mp exit", Pattern.compile("^mp exit$"),
                 (Object... a) -> Utilities.exit(isRunning)
         );
-
-//        for (String key : CommandHandler.getCommandsMap().keySet()) {
-//            System.out.println(key);
-//        }
 
         while (isRunning.get()) {
             String option = sc.nextLine().trim();

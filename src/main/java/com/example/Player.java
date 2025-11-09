@@ -6,7 +6,6 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 
 import java.nio.file.Path;
-import java.util.Arrays;
 
 public class Player {
     private MediaPlayer player;
@@ -29,13 +28,15 @@ public class Player {
 //        System.out.println("I'm running, here's the player object: " + player);
 //        System.out.println("Here's the provided path as well: " + musicPath);
 
+        isLooped = false;
         // Add listener to the end of the music so it plays the next one in the queue
-        if (!isLooped) {
-            player.setOnEndOfMedia(this::playNext);
-        } else {
-            System.out.println("The current music is looped so I won't play the next one.");
-            return;
-        }
+        player.setOnEndOfMedia(this::playNext);
+        // *** This block is in case the program needs to prevent playing a different music
+        // if the current one is looped ***
+//        else {
+//            System.out.println("The current music is looped so I won't play the next one.");
+//            return;
+//        }
         player.setOnReady(() -> {
             player.seek(Duration.ZERO); // ensure playback starts from beginning
             player.play();
@@ -90,12 +91,48 @@ public class Player {
             System.out.println("No music to resume.");
             return;
         }
+
         MediaPlayer.Status status = player.getStatus();
         // If the music isn't already playing, play it again
         if (status != MediaPlayer.Status.PLAYING) {
             player.play();
             System.out.println("Music resumed.");
         }
+    }
+
+    public void forward(int howMuch) {
+        if (player == null) {
+            System.out.println("No music to forward.");
+            return;
+        }
+
+        Duration currentTime = player.getCurrentTime();
+        Duration newTime = currentTime.add(Duration.seconds(howMuch));
+        Duration totalTime = player.getTotalDuration();
+        if (!isLooped) {
+            player.seek(newTime);
+        } else {
+            if (newTime.greaterThanOrEqualTo(totalTime)) {
+                newTime = Duration.ZERO;
+            }
+            player.seek(newTime);
+        }
+    }
+
+    public void rewind(int howMuch) {
+        if (player == null) {
+            System.out.println("No music to rewind.");
+            return;
+        }
+
+        Duration currentTime = player.getCurrentTime();
+        Duration newTime = currentTime.subtract(Duration.seconds(howMuch));
+
+        if (newTime.lessThan(Duration.ZERO)) {
+            newTime = Duration.ZERO;
+        }
+
+        player.seek(newTime);
     }
 
     public Queue getQueue() {
