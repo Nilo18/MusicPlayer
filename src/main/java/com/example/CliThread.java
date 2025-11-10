@@ -34,13 +34,34 @@ public class CliThread implements Runnable {
                         .map(Object::toString)
                         .toArray(String[]::new)))
         );
+        /* Shortcut command for playing */
+        CommandHandler.addCommand("mp p", Pattern.compile("^mp p -\"([^\"]+)\"$"),
+                (Object... option) ->
+                        Utilities.playMusic(String.join(" ", Arrays.stream(option)
+                                .map(Object::toString)
+                                .toArray(String[]::new)))
+        );
         CommandHandler.addCommand("mp forward", Pattern.compile("^mp forward -([^\"]+)$"),
                 (Object... option) ->
                 PlayerManager.forward(String.join(" ", Arrays.stream(option)
                         .map(Object::toString)
                         .toArray(String[]::new)))
         );
+        /* Shortcut command for forwarding */
+        CommandHandler.addCommand("mp f", Pattern.compile("^mp f -([^\"]+)$"),
+                (Object... option) ->
+                        PlayerManager.forward(String.join(" ", Arrays.stream(option)
+                                .map(Object::toString)
+                                .toArray(String[]::new)))
+        );
         CommandHandler.addCommand("mp rewind", Pattern.compile("^mp rewind -([^\"]+)$"),
+                (Object... option) ->
+                        PlayerManager.rewind(String.join(" ", Arrays.stream(option)
+                                .map(Object::toString)
+                                .toArray(String[]::new)))
+        );
+        /* Shortcut command for rewinding */
+        CommandHandler.addCommand("mp r", Pattern.compile("^mp r -([^\"]+)$"),
                 (Object... option) ->
                         PlayerManager.rewind(String.join(" ", Arrays.stream(option)
                                 .map(Object::toString)
@@ -50,63 +71,41 @@ public class CliThread implements Runnable {
         CommandHandler.addCommand("mp loop", Pattern.compile("^mp loop$"),
                 (Object... a) -> Platform.runLater(PlayerManager::loop)
         );
+        CommandHandler.addCommand("mp l", Pattern.compile("^mp l$"),
+                (Object... a) -> Platform.runLater(PlayerManager::loop)
+        );
         CommandHandler.addCommand("mp skip", Pattern.compile("^mp skip$"),
+                (Object... a) -> PlayerManager.skip()
+        );
+        CommandHandler.addCommand("mp s", Pattern.compile("^mp s$"),
                 (Object... a) -> PlayerManager.skip()
         );
         CommandHandler.addCommand("mp pause", Pattern.compile("^mp pause$"),
             (Object... a) -> PlayerManager.pause()
         );
+        CommandHandler.addCommand("mp pa", Pattern.compile("^mp pa$"),
+                (Object... a) -> PlayerManager.pause()
+        );
         CommandHandler.addCommand("mp resume", Pattern.compile("^mp resume$"),
+                (Object... a) -> PlayerManager.resume()
+        );
+        CommandHandler.addCommand("mp re", Pattern.compile("^mp re$"),
                 (Object... a) -> PlayerManager.resume()
         );
         CommandHandler.addCommand("mp exit", Pattern.compile("^mp exit$"),
                 (Object... a) -> Utilities.exit(isRunning)
         );
+        CommandHandler.addCommand("mp e", Pattern.compile("^mp e$"),
+                (Object... a) -> Utilities.exit(isRunning)
+        );
+        CommandHandler.addCommand("mp help", Pattern.compile("^mp help$"),
+                (Object... a) -> Utilities.showAllCommands()
+        );
 
         while (isRunning.get()) {
             String option = sc.nextLine().trim();
-            String[] tokens = option.split(" ");
-
-            String commandKey;
-            Object[] args;
-
-            if (tokens.length >= 2 && tokens[0].equals("mp")) {
-                // Ensure that command keys become mp + [stored command] like mp play or mp loop
-                commandKey = tokens[0] + " " + tokens[1];
-                // coppyOfRange creates a subarray from a given starting index to the given ending index,
-                // The first argument is the original array, the second is the starting index and the third
-                // is the ending index
-                args = Arrays.copyOfRange(tokens,2, tokens.length);
-            } else {
-                // Fallback
-                commandKey = tokens[0];
-                args = Arrays.copyOfRange(tokens, 1, 1);
-            }
 
             CommandHandler.executeCommand(option);
-
-
-
-//            if (option.contains("mp play -")) {
-//                String[] token = option.split("\"");
-//                String musicName = token[1];
-//                Searcher.search(musicName);
-//            } else if (option.equals("mp loop")) {
-//                Platform.runLater(() -> PlayerManager.loop());
-//            } else if (option.equals("mp skip")) {
-//                PlayerManager.skip();
-//            } else if(option.equals("mp pause")) {
-//                PlayerManager.pause();
-//            } else if(option.equals("mp resume")) {
-//                PlayerManager.resume();
-//            } else if (option.equals("mp exit")) {
-//                System.out.println("Exiting MusicPlayer CLI...");
-//                isRunning.set(false);
-//                Platform.exit(); // Exit javafx thread
-//                System.exit(0); // Exit the JVM completely
-//            } else {
-//                System.out.println("Unrecognized command.");
-//            }
         }
     }
 }

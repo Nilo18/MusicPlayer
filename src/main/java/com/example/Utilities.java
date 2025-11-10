@@ -63,8 +63,10 @@ public class Utilities {
         Searcher.search(musicName);
     }
 
-    public static void loopMusic() {
-        Platform.runLater(() -> PlayerManager.loop());
+    public static void showAllCommands() {
+        System.out.println("mp pause --- Pause the music which is currently playing. Shortcut: mp pa.");
+        System.out.println("mp resume --- Resume the music which is currently playing. Shortcut: mp re");
+        System.out.println("mp forward -AMOUNT IN SECONDS --- Forward the music by given seconds. Shortcut: mp f -AMOUNT IN SECONDS.");
+        System.out.println("mp rewind -AMOUNT IN SECONDS --- Rewind the music by given seconds. Shortcut: mp r -AMOUNT IN SECONDS.");
     }
-
 }
