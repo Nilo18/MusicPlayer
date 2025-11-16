@@ -1,11 +1,21 @@
 package com.example;
 
-import javafx.application.Platform;
 import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import org.jline.keymap.BindingReader;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+
+import java.io.IOException;
+import java.util.List;
 
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Player {
     private MediaPlayer player;
@@ -31,19 +41,19 @@ public class Player {
         isLooped = false;
         // Add listener to the end of the music so it plays the next one in the queue
         player.setOnEndOfMedia(this::playNext);
-        // *** This block is in case the program needs to prevent playing a different music
-        // if the current one is looped ***
-//        else {
-//            System.out.println("The current music is looped so I won't play the next one.");
-//            return;
-//        }
+
         player.setOnReady(() -> {
             player.seek(Duration.ZERO); // ensure playback starts from beginning
             player.play();
         });
         player.setOnError(() -> {
-            System.out.println("Media error: " + player.getError());
-            if (player.getError() != null) player.getError().printStackTrace();
+            MediaException ex = player.getError();
+            switch (ex.getType()) {
+                case MEDIA_UNSUPPORTED -> System.out.println("The music contains unsupported file format.");
+                case MEDIA_INACCESSIBLE -> System.out.println("Couldn't open the downloaded music file.");
+                case MEDIA_UNAVAILABLE -> System.out.println("Media is currently unavailable.");
+                default -> System.out.println("Unknown error has occurred: " + ex.getType());
+            }
         });
     }
 
@@ -145,5 +155,56 @@ public class Player {
 
     public boolean isLooping() {
         return isLooped;
+    }
+
+    public void showPlaylist() {
+        System.out.println("Press ARROW UP or ARROW DOWN to navigate over the list.");
+        System.out.println("Press ENTER to select the desired music and q to exit.");
+        List<Path> playlist = queue.getPlaylist();
+        AtomicInteger selectedRow = new AtomicInteger(1);
+        AtomicBoolean isSelecting = new AtomicBoolean(true);
+        String selectedMusic = "";
+        try {
+            Terminal terminal = TerminalBuilder.builder().system(true).build();
+            terminal.enterRawMode();
+            terminal.flush();
+            terminal.writer().print("\033[6n");
+            terminal.writer().flush();
+            selectedMusic = PlayerUtilities.printPlaylist(playlist, selectedRow, terminal);
+            terminal.flush();
+            while (isSelecting.get()) {
+                int ch = terminal.reader().read();
+
+                switch(ch) {
+                    // 65 stands for arrow up
+                    case 65 -> {
+                        selectedMusic = PlayerUtilities.moveUpOnPlaylist(playlist, selectedRow, terminal);
+                        terminal.flush();
+                    }
+                    // 66 stands for arrow down
+                    case 66 -> {
+                        selectedMusic = PlayerUtilities.moveDownOnPlaylist(playlist, selectedRow, terminal);
+                        terminal.flush();
+                    }
+                    // 13 stands for Enter
+                    case 13 -> {
+                        PlayerUtilities.playPlaylistMusic(selectedMusic, terminal, isSelecting);
+                    }
+                    // 133 stands for q
+                    case 113 -> {
+                        System.out.println("\nExited the selection mode");
+                        isSelecting.set(false);
+                    }
+                    case -1 -> {
+                        isSelecting.set(false);
+                    }
+                }
+            }
+            terminal.close();
+        } catch (IOException err) {
+            System.out.println("Couldn't initialize the terminal.");
+        } catch (Exception err) {
+            System.out.println("Unexpected error has occurred while trying to show the playlist: " + err);
+        }
     }
 }

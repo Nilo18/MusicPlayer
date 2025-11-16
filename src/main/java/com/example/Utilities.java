@@ -1,16 +1,22 @@
 package com.example;
 
 import javafx.application.Platform;
+import org.jline.terminal.Terminal;
+import org.jline.utils.InfoCmp;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
+/* The following class stores general utility methods */
 public class Utilities {
     public static boolean openingSupported() {
         return Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE);
@@ -22,7 +28,6 @@ public class Utilities {
                 Desktop.getDesktop().open(fileToOpen);
             } catch (IOException e) {
                 System.out.println("Couldn't open the file.");
-                return;
             }
         } else {
             System.err.println("Desktop operations (opening browser) are not supported on this system.");
@@ -43,7 +48,6 @@ public class Utilities {
                 Files.createDirectories(dir);
             } catch (IOException e) {
                 System.out.println("Couldn't create MpMusic directory.");
-                return;
             }
         }
     }
@@ -57,16 +61,18 @@ public class Utilities {
 
     public static void playMusic(String option) {
         String[] token = option.split("\"");
-//        System.out.println("Token is: " + Arrays.toString(token));
         String musicName = token[0];
-//        System.out.println("The music name is: " + musicName);
         Searcher.search(musicName);
     }
 
     public static void showAllCommands() {
+        System.out.println();
         System.out.println("mp pause --- Pause the music which is currently playing. Shortcut: mp pa.");
         System.out.println("mp resume --- Resume the music which is currently playing. Shortcut: mp re");
         System.out.println("mp forward -AMOUNT IN SECONDS --- Forward the music by given seconds. Shortcut: mp f -AMOUNT IN SECONDS.");
         System.out.println("mp rewind -AMOUNT IN SECONDS --- Rewind the music by given seconds. Shortcut: mp r -AMOUNT IN SECONDS.");
+        System.out.println("mp list --- Show the playlist of all downloaded music stored in MpMusic folder. Shortcut: mp li.");
+        System.out.println();
     }
+
 }

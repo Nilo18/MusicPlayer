@@ -1,2 +1,15 @@
+com\example\Queue.class
+com\example\Player.class
+com\example\Player$1.class
+com\example\AppConfig.class
+com\example\CliThread.class
+com\example\CommandFunction.class
+com\example\PlayerManager.class
+com\example\Downloader.class
+com\example\Command.class
+com\example\Searcher.class
+com\example\CommandHandler.class
+com\example\PlayerUtilities.class
 com\example\App.class
-com\example\Person.class
+com\example\Utilities.class
+com\example\Color.class

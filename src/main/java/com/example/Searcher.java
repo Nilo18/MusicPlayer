@@ -12,10 +12,16 @@ import com.google.gson.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+
+import javafx.application.Platform;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -59,12 +65,42 @@ public class Searcher {
             } else {
                 System.out.println("No such video was found.");
             }
+        }
+        // If there's no internet, look for the music locally
+        catch (UnknownHostException err) {
+            System.out.println("Failed to search due to lack of internet connection.");
+            System.out.println("Searching for the music locally...");
+            String musicFileName = keyword.endsWith(".mp3") ? keyword : keyword + ".mp3";
+            Path potentialPath = Paths.get(System.getProperty("user.home"), "MpMusic", musicFileName);
+            List<Path> playlist = PlayerManager.getQueue().getPlaylist();
+            boolean musicWasFoundLocally = false;
+            for (Path musicPath : playlist) {
+                /*
+                 Extract the actual music name from the path
+                 We could also compare the path directly using musicPath.toString()
+                 But it wouldn't bring any benefit because the name of the file is what matters.
+                */
+                String[] tokens = musicPath.toString().split("MpMusic\\\\");
+                String musicName = tokens[1];
+//                System.out.println("The music names are: " + musicName.toLowerCase());
+//                System.out.println("Comparing them to: " + keyword.toLowerCase());
+                if (musicName.toLowerCase().contains(keyword.toLowerCase())) {
+                    // If any of the titles match the keyword, play the path and exit the loop
+                    // This will prevent play() method being called too many times.
+                    System.out.println("Music found locally, playing...");
+                    Platform.runLater(() -> PlayerManager.play(musicPath));
+                    musicWasFoundLocally = true;
+                    break;
+                }
+            }
+            if (!musicWasFoundLocally) {
+                System.out.println("Couldn't find the music locally either.");
+            }
         } catch (IOException err) {
             System.out.println("Couldn't receive response from the search: " + err);
-            return;
-        } catch (Exception e) {
-            System.err.println("An error occurred during download: " + e);
-            e.printStackTrace();
+
+        } catch (Exception err) {
+            System.err.println("An error occurred during download, please try again.");
         }
     }
 
@@ -91,7 +127,7 @@ public class Searcher {
         String youtubeURL = "https://www.youtube.com/watch?v=" + id;
         HttpClient client = HttpClient.newHttpClient();
         try {
-            // Make a request to the given youtube music video page
+            // Make a request to the given YouTube music video page
             HttpRequest req = HttpRequest.newBuilder().
                     uri(URI.create(youtubeURL)).
                     header("User-Agent", "Mozilla/5.0").
@@ -108,13 +144,10 @@ public class Searcher {
             }
         } catch (IOException err) {
             System.out.println("Couldn't receive response from the search: " + err);
-            return;
         } catch (InterruptedException err) {
             System.out.println("The search was interrupted: " + err);
-            return;
         } catch (IllegalArgumentException err) {
             System.out.println("Invalid URL argument: " + err);
-            return;
         }
     }
 

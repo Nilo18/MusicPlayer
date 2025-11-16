@@ -16,8 +16,8 @@ public class CliThread implements Runnable {
         Scanner sc = new Scanner(System.in);
 
         /*
-           Define a valid syntax with Pattern.compile()
-           to ensure that the user uses the commands with the intended syntax
+           Pattern.compile() is used to define valid syntaxes for the commands
+           to ensure that the user uses the commands with the intended syntax.
            ^ matches the start of the string and ensures the command always begins with mp
            $ matches the end of the string and ensures that there are no other characters after the command
            \" and \" match the start and the end of the search keyword
@@ -101,8 +101,18 @@ public class CliThread implements Runnable {
         CommandHandler.addCommand("mp help", Pattern.compile("^mp help$"),
                 (Object... a) -> Utilities.showAllCommands()
         );
+        CommandHandler.addCommand("mp list", Pattern.compile("^mp list$"),
+                (Object... a) -> PlayerManager.showPlaylist()
+        );
+        CommandHandler.addCommand("mp li", Pattern.compile("^mp li$"),
+                (Object... a) -> PlayerManager.showPlaylist()
+        );
 
         while (isRunning.get()) {
+            if (!sc.hasNextLine()) {
+                break;
+            }
+
             String option = sc.nextLine().trim();
 
             CommandHandler.executeCommand(option);

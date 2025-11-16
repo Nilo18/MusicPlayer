@@ -93,4 +93,12 @@ public class PlayerManager {
             System.out.println("The suggested rewind exceeds the rewinding capacity.");
         }
     }
+
+    public static void showPlaylist() {
+        player.showPlaylist();
+    }
+
+    public static Queue getQueue() {
+        return player.getQueue();
+    }
 }

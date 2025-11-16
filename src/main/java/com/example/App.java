@@ -56,7 +56,16 @@ public class App extends Application {
 
 
     public static void main( String[] args ) {
-        launch(args);
+        if (args.length == 0) {
+            System.out.println("No argument provided.");
+            return;
+        }
+
+        if (args[0].equals("init")) {
+            launch(args);
+            return;
+        }
+
         // 3. Parse the first 5-10 results of the search using Gson
         // 4. Ask the user to choose between one of them by typing numbers 1-10
         // 5. Download the selected option using java-youtube-downloader, it should be stored in MpMusic folder

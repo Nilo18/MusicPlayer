@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,7 @@ public class Queue {
                     collect(Collectors.toList());
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Couldn't load playlist.");;
         }
     }
 
@@ -45,5 +44,9 @@ public class Queue {
         currentIndex = (currentIndex + 1) % queue.size(); // Allow wrapping to the first music in the queue
 
         return queue.get(currentIndex);
+    }
+
+    public List<Path> getPlaylist() {
+        return queue;
     }
 }
