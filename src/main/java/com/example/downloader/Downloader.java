@@ -1,5 +1,8 @@
-package com.example;
+package com.example.downloader;
 
+import com.example.AppConfig;
+import com.example.player.PlayerManager;
+import com.example.utilities.Utilities;
 import com.google.gson.*;
 import javafx.application.Platform;
 
@@ -18,23 +21,21 @@ public class Downloader {
     // title is used to name the mp3 file after downloading
     // url is used to create a valid URI string
     public static void downloadVideo(String title, String url) {
-        HttpClient client = HttpClient.newHttpClient();
         System.out.println("Downloading " + title + "...");
+        HttpClient client = HttpClient.newHttpClient();
         String illegalCharactersRegex = "[\\\\/:*?\"<>|]";
-
         // Replace all occurrences of these illegal characters with an underscore (_)
         String safeTitle = title.replaceAll(illegalCharactersRegex, "_");
 
         Path filePath = Paths.get(System.getProperty("user.home"), "MpMusic", safeTitle + ".mp3");
         // If the suggested music is already downloaded, play it directly and exit without making any HTTP reqs
         if (Files.exists(filePath)) {
-            System.out.println("The suggested music has already been downloaded.");
-            System.out.println("Opening it locally...");
+            System.out.println("The suggested music has already been downloaded. Opening it locally...");
             Utilities.printCurrentMusic(title, url);
             Platform.runLater(() -> PlayerManager.play(filePath));
             return;
         }
-        // If the music isn't downloaded, make a request to the youtube to mp3 API to download it
+        // If the music isn't downloaded, make a request to the YouTube to mp3 API to download it
         try {
             HttpRequest req = HttpRequest.newBuilder().
                     uri(URI.create(url)).
@@ -44,16 +45,21 @@ public class Downloader {
                     build();
 
             HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
-
-            Gson gson = new Gson();
+//            System.out.println("Received the response: " + res.body());
             JsonElement rootElem = JsonParser.parseString(res.body());
+            if (!rootElem.isJsonObject()) {
+                System.out.println("Unexpected response format: not a JSON object");
+                return;
+            }
             JsonObject rootObject = rootElem.getAsJsonObject();
-
+            if (!rootObject.has("link")) {
+                System.out.println("No 'link' field in response JSON");
+                return;
+            }
 
             String downloadLink = rootObject.get("link").getAsString();
             Path mpDir = Paths.get(System.getProperty("user.home"), "MpMusic");
             Utilities.createDirectory(mpDir);
-
 
             HttpRequest downloadReq = HttpRequest.newBuilder().
                     uri(URI.create(downloadLink)).
@@ -82,6 +88,8 @@ public class Downloader {
             // Handle errors where the JSON response structure is unexpected or invalid
             System.err.println("JSON Parsing Error: The API response format was invalid or unexpected keys were missing. " + e.getMessage());
             // You can print the body here for debugging: System.out.println("Response Body: " + res.body());
+        } catch (Exception err) {
+            System.out.println("Unknown error has occurred: " + err);
         }
     }
 }

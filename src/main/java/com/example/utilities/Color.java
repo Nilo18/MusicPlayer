@@ -1,4 +1,4 @@
-package com.example;
+package com.example.utilities;
 
 /* This enum will be used when music selection mode is active.
 *  For example in mp list command, BLUE will be used to highlight the current music the user is choosing */

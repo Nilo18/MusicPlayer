@@ -1,12 +1,9 @@
-package com.example;
+package com.example.player;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
-import org.jline.keymap.BindingReader;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
@@ -157,7 +154,8 @@ public class Player {
         return isLooped;
     }
 
-    public void showPlaylist() {
+    /* Enters a mode where user can choose between the playlist using arrows */
+    public void activatePlaylistSelectionMode() {
         System.out.println("Press ARROW UP or ARROW DOWN to navigate over the list.");
         System.out.println("Press ENTER to select the desired music and q to exit.");
         List<Path> playlist = queue.getPlaylist();
@@ -192,7 +190,7 @@ public class Player {
                     }
                     // 133 stands for q
                     case 113 -> {
-                        System.out.println("\nExited the selection mode");
+                        System.out.println("\nExited the selection mode.");
                         isSelecting.set(false);
                     }
                     case -1 -> {

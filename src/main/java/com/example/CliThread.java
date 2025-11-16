@@ -1,5 +1,9 @@
 package com.example;
 
+import com.example.commands.CommandHandler;
+import com.example.player.PlayerManager;
+import com.example.searcher.Searcher;
+import com.example.utilities.Utilities;
 import javafx.application.Platform;
 
 import java.util.Arrays;
@@ -30,16 +34,27 @@ public class CliThread implements Runnable {
         */
         CommandHandler.addCommand("mp play", Pattern.compile("^mp play -\"([^\"]+)\"$"),
                 (Object... option) ->
-                Utilities.playMusic(String.join(" ", Arrays.stream(option)
+                Searcher.search(String.join(" ", Arrays.stream(option)
                         .map(Object::toString)
-                        .toArray(String[]::new)))
+                        .toArray(String[]::new)), 1L)
         );
         /* Shortcut command for playing */
         CommandHandler.addCommand("mp p", Pattern.compile("^mp p -\"([^\"]+)\"$"),
                 (Object... option) ->
-                        Utilities.playMusic(String.join(" ", Arrays.stream(option)
+                        Searcher.search(String.join(" ", Arrays.stream(option)
                                 .map(Object::toString)
-                                .toArray(String[]::new)))
+                                .toArray(String[]::new)), 1L)
+        );
+        CommandHandler.addCommand("mp search", Pattern.compile("^mp search -\"([^\"]+)\"$"),
+                (Object... option)  -> Searcher.search(String.join(" ", Arrays.stream(option)
+                                .map(Object::toString)
+                                .toArray(String[]::new)), 5L)
+        );
+        /* Shortcut command for searching */
+        CommandHandler.addCommand("mp se", Pattern.compile("^mp se -\"([^\"]+)\"$"),
+                (Object... option)  -> Searcher.search(String.join(" ", Arrays.stream(option)
+                        .map(Object::toString)
+                        .toArray(String[]::new)), 5L)
         );
         CommandHandler.addCommand("mp forward", Pattern.compile("^mp forward -([^\"]+)$"),
                 (Object... option) ->

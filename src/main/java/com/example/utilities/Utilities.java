@@ -1,20 +1,13 @@
-package com.example;
+package com.example.utilities;
 
 import javafx.application.Platform;
-import org.jline.terminal.Terminal;
-import org.jline.utils.InfoCmp;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /* The following class stores general utility methods */
 public class Utilities {
@@ -47,7 +40,7 @@ public class Utilities {
             try {
                 Files.createDirectories(dir);
             } catch (IOException e) {
-                System.out.println("Couldn't create MpMusic directory.");
+                System.out.println("Couldn't create directory.");
             }
         }
     }
@@ -59,11 +52,11 @@ public class Utilities {
         System.exit(0); // Exit the JVM completely
     }
 
-    public static void playMusic(String option) {
-        String[] token = option.split("\"");
-        String musicName = token[0];
-        Searcher.search(musicName);
-    }
+//    public static void playMusic(String option) {
+//        String[] token = option.split("\"");
+//        String musicName = token[0];
+//        Searcher.search(musicName, 1L);
+//    }
 
     public static void showAllCommands() {
         System.out.println();

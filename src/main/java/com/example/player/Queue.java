@@ -1,4 +1,4 @@
-package com.example;
+package com.example.player;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package com.example;
+package com.example.player;
 
 import java.nio.file.Path;
 
@@ -95,7 +95,7 @@ public class PlayerManager {
     }
 
     public static void showPlaylist() {
-        player.showPlaylist();
+        player.activatePlaylistSelectionMode();
     }
 
     public static Queue getQueue() {

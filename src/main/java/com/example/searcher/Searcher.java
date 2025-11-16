@@ -1,5 +1,7 @@
-package com.example;
+package com.example.searcher;
 
+import com.example.AppConfig;
+import com.example.downloader.Downloader;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
@@ -7,26 +9,87 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeRequestInitializer;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
-import com.google.gson.*;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-import javafx.application.Platform;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 public class Searcher {
-    public static void searchByKeyword(String keyword) {
+/* Enters a mode where user can choose between the searched results using arrows */
+public static void activateSearchSelectionMode(List<SearchResult> results) {
+    AtomicBoolean isSelecting = new AtomicBoolean(true);
+    AtomicInteger selectedRow = new AtomicInteger(1);
+    String selectedMusic = "";
+    try {
+        Terminal terminal = TerminalBuilder.builder().system(true).build();
+        terminal.enterRawMode();
+        terminal.flush();
+        terminal.writer().print("\033[6n");
+        terminal.writer().flush();
+        selectedMusic = SearcherUtilities.printResults(results, selectedRow, terminal);
+        terminal.flush();
+        while (isSelecting.get()) {
+            int ch = terminal.reader().read();
+
+            switch(ch) {
+                // 65 stands for arrow up
+                case 65 -> {
+                    selectedMusic = SearcherUtilities.moveUpOnSearchResults(results, selectedRow, terminal);
+                    terminal.flush();
+                }
+                // 66 stands for arrow down
+                case 66 -> {
+                    selectedMusic = SearcherUtilities.moveDownOnSearchResults(results, selectedRow, terminal);
+                    terminal.flush();
+                }
+                // 13 stands for Enter
+                case 13 -> {
+                    String finalSelectedMusic = selectedMusic;
+                    AtomicReference<String> url = new AtomicReference<>("");
+                    // Construct downloader API url by extracting the video from the selected music
+                    Optional<SearchResult> found = results.stream()
+                            .filter(result -> result.getSnippet().getTitle().equals(finalSelectedMusic))
+                            .findFirst();
+                    found.ifPresent(match -> {
+                       String videoId = match.getId().getVideoId();
+                       url.set("https://youtube-mp36.p.rapidapi.com/dl?id=" + videoId);
+                    });
+                    SearcherUtilities.playResultsSelectedMusic(selectedMusic, String.valueOf(url.get()), terminal, isSelecting);
+                }
+                // 133 stands for q
+                case 113 -> {
+                    System.out.println("Pressing q");
+                    System.out.println("\nExited the selection mode.");
+                    isSelecting.set(false);
+                }
+                case -1 -> {
+                    isSelecting.set(false);
+                }
+            }
+        }
+      terminal.close();
+       } catch (IOException err) {
+           System.out.println("Couldn't initialize the terminal.");
+       } catch (Exception err) {
+           System.out.println("Unexpected error has occurred while trying to show results: " + err);
+           err.printStackTrace();
+       }
+    }
+
+    public static void searchByKeyword(String keyword, Long amount) {
         // JsonFactory is an interface which defines how a json parser should behave
         // GsonFactory.getDefaultInstance() sets up the parser with the default settings
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
@@ -48,7 +111,7 @@ public class Searcher {
             YouTube.Search.List search = youtube.search().list("id, snippet");
             search.setQ(keyword); // Set the query to the suggested song name
             search.setType("video"); // Set the type of the request to video
-            search.setMaxResults(1L); // L is used here because the method expects long
+            search.setMaxResults(amount); // L is used here because the method expects long
 
             // This will send the request to the YouTube's servers and wait for the response
             SearchListResponse response = search.execute();
@@ -58,9 +121,12 @@ public class Searcher {
             if (results != null && !results.isEmpty()) {
                 SearchResult video = results.get(0); // only item
                 String title = video.getSnippet().getTitle();
-//                System.out.println("Downloading " + title + "...");
 
                 String url = "https://youtube-mp36.p.rapidapi.com/dl?id=" + video.getId().getVideoId();
+                if (amount > 1L) {
+                    activateSearchSelectionMode(results);
+                    return;
+                }
                 Downloader.downloadVideo(title, url);
             } else {
                 System.out.println("No such video was found.");
@@ -68,34 +134,7 @@ public class Searcher {
         }
         // If there's no internet, look for the music locally
         catch (UnknownHostException err) {
-            System.out.println("Failed to search due to lack of internet connection.");
-            System.out.println("Searching for the music locally...");
-            String musicFileName = keyword.endsWith(".mp3") ? keyword : keyword + ".mp3";
-            Path potentialPath = Paths.get(System.getProperty("user.home"), "MpMusic", musicFileName);
-            List<Path> playlist = PlayerManager.getQueue().getPlaylist();
-            boolean musicWasFoundLocally = false;
-            for (Path musicPath : playlist) {
-                /*
-                 Extract the actual music name from the path
-                 We could also compare the path directly using musicPath.toString()
-                 But it wouldn't bring any benefit because the name of the file is what matters.
-                */
-                String[] tokens = musicPath.toString().split("MpMusic\\\\");
-                String musicName = tokens[1];
-//                System.out.println("The music names are: " + musicName.toLowerCase());
-//                System.out.println("Comparing them to: " + keyword.toLowerCase());
-                if (musicName.toLowerCase().contains(keyword.toLowerCase())) {
-                    // If any of the titles match the keyword, play the path and exit the loop
-                    // This will prevent play() method being called too many times.
-                    System.out.println("Music found locally, playing...");
-                    Platform.runLater(() -> PlayerManager.play(musicPath));
-                    musicWasFoundLocally = true;
-                    break;
-                }
-            }
-            if (!musicWasFoundLocally) {
-                System.out.println("Couldn't find the music locally either.");
-            }
+            SearcherUtilities.handleNoInternet(keyword);
         } catch (IOException err) {
             System.out.println("Couldn't receive response from the search: " + err);
 
@@ -125,8 +164,8 @@ public class Searcher {
     public static void searchByURL(String id) {
         String url = "https://youtube-mp36.p.rapidapi.com/dl?id=" + id;
         String youtubeURL = "https://www.youtube.com/watch?v=" + id;
-        HttpClient client = HttpClient.newHttpClient();
         try {
+            HttpClient client = HttpClient.newHttpClient();
             // Make a request to the given YouTube music video page
             HttpRequest req = HttpRequest.newBuilder().
                     uri(URI.create(youtubeURL)).
@@ -151,22 +190,23 @@ public class Searcher {
         }
     }
 
-    public static void search(String token) {
-//        System.out.println("Downloading " + token + "...");
+    public static void search(String option, Long amount) {
+        String[] token = option.split("\"");
+        String musicName = token[0];
         // If the user entering a URL extract the id of the video from it using Jsoup
         // Else search by the name using YouTube API
-        if (token.contains("https://www.youtube.com/watch?v=")) {
-            System.out.println("Searching " + token + "...");
-            String[] splitToken = token.split("v=");
+        if (musicName.contains("https://www.youtube.com/watch?v=")) {
+            System.out.println("Searching " + musicName + "...");
+            String[] splitToken = musicName.split("v=");
             String queryParams = splitToken[1];
             int delimiterIndex = queryParams.indexOf("&");
             String id = queryParams.substring(0, delimiterIndex);
             searchByURL(id);
-        } else if (token.contains("https://") && !token.contains("www.youtube.com/watch?v=")) {
+        } else if (musicName.contains("https://") && !musicName.contains("www.youtube.com/watch?v=")) {
             System.out.println("Only valid youtube video URLs are allowed.");
         } else {
-            System.out.println("Searching " + token + "...");
-            searchByKeyword(token);
+            System.out.println("Searching " + musicName + "...");
+            searchByKeyword(musicName, amount);
         }
     }
 }

@@ -1,5 +1,6 @@
-package com.example;
+package com.example.player;
 
+import com.example.utilities.Color;
 import org.jline.terminal.Terminal;
 import org.jline.utils.InfoCmp;
 
@@ -19,7 +20,6 @@ public class PlayerUtilities {
             String musicName = tokens[1];
             String prefix = "> ";
             if (i + 1 == selectedRow.get()) {
-                System.out.println("Painting selectedMusic blue...");
                 terminal.writer().println(Color.BLUE + prefix + musicName + Color.RESET);
                 selectedMusic = musicName;
             } else {
@@ -31,7 +31,6 @@ public class PlayerUtilities {
 
     // AtomicInteger is used to make sure that this method modifies the original selectedRow variable
     public static String moveUpOnPlaylist(List<Path> playlist, AtomicInteger selectedRow, Terminal terminal) {
-        System.out.println("The selectedRow: " + selectedRow);
         if (selectedRow.get() > 1) selectedRow.decrementAndGet();
         terminal.writer().print("\033[3J");  // clear scrollback
         terminal.puts(InfoCmp.Capability.clear_screen);
@@ -45,6 +44,7 @@ public class PlayerUtilities {
 //                        terminal.puts(Capability.cursor_address, cursorRow, cursorCol);
 //                        terminal.flush();
     }
+
 
 
     public static String moveDownOnPlaylist(List<Path> playlist, AtomicInteger selectedRow, Terminal terminal) {
@@ -61,6 +61,7 @@ public class PlayerUtilities {
 //                        terminal.puts(Capability.cursor_address, cursorRow, cursorCol);
 //                        terminal.flush();
     }
+
 
     public static void playPlaylistMusic(String selectedMusic, Terminal terminal, AtomicBoolean isSelecting) {
         if (!selectedMusic.isEmpty()) {
