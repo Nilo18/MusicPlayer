@@ -12,5 +12,6 @@ com\example\player\PlayerManager.class
 com\example\player\Queue.class
 com\example\commands\CommandFunction.class
 com\example\utilities\Utilities.class
+com\example\player\PlaylistPagination.class
 com\example\utilities\Color.class
 com\example\commands\Command.class

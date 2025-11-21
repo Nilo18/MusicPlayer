@@ -60,6 +60,10 @@ public class Utilities {
 
     public static void showAllCommands() {
         System.out.println();
+        System.out.println("mp play -" + "NAME OF THE SONG/YOUTUBE URL" + "--- Play the desired music, the music will be downloaded (if it isn't already installed) and played locally. Shortcut: mp p -" + "NAME OF THE SONG/YOUTUBE URL");
+        System.out.println("mp loop --- Loop the music which is currently playing. Shortcut: mp l");
+        System.out.println("mp skip --- Skip the music which is playing currently. Shortcut: mp s");
+        System.out.println("mp exit --- Exit the CLI. Shortcut: mp e");
         System.out.println("mp pause --- Pause the music which is currently playing. Shortcut: mp pa.");
         System.out.println("mp resume --- Resume the music which is currently playing. Shortcut: mp re");
         System.out.println("mp forward -AMOUNT IN SECONDS --- Forward the music by given seconds. Shortcut: mp f -AMOUNT IN SECONDS.");

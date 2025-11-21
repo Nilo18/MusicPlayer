@@ -156,8 +156,6 @@ public class Player {
 
     /* Enters a mode where user can choose between the playlist using arrows */
     public void activatePlaylistSelectionMode() {
-        System.out.println("Press ARROW UP or ARROW DOWN to navigate over the list.");
-        System.out.println("Press ENTER to select the desired music and q to exit.");
         List<Path> playlist = queue.getPlaylist();
         AtomicInteger selectedRow = new AtomicInteger(1);
         AtomicBoolean isSelecting = new AtomicBoolean(true);
@@ -184,13 +182,41 @@ public class Player {
                         selectedMusic = PlayerUtilities.moveDownOnPlaylist(playlist, selectedRow, terminal);
                         terminal.flush();
                     }
+
+                    // 67 stands for arrow right
+                    case 67 -> {
+                        selectedMusic = PlaylistPagination.moveForward(playlist, selectedRow, terminal);
+                        terminal.flush();
+                    }
+
+                    // 68 stands for arrow left
+                    case 68 -> {
+                        selectedMusic = PlaylistPagination.moveBehind(playlist, selectedRow, terminal);
+                        terminal.flush();
+                    }
+
                     // 13 stands for Enter
                     case 13 -> {
-                        PlayerUtilities.playPlaylistMusic(selectedMusic, terminal, isSelecting);
+                        if (!selectedMusic.isEmpty()) {
+                            PlayerUtilities.playPlaylistMusic(selectedMusic, terminal, isSelecting);
+                            PlaylistPagination.setStart(0);
+                            PlaylistPagination.setEnd(10);
+                            PlaylistPagination.setMoveRange(10);
+                            PlaylistPagination.setPageNumber(1);
+                            System.out.println("\nExited the selection mode.");
+//                            System.out.println("Reset the page number.");
+                        } else {
+                            System.out.println("Missing selected music to play from the playlist.");
+                        }
                     }
                     // 133 stands for q
                     case 113 -> {
                         System.out.println("\nExited the selection mode.");
+                        PlaylistPagination.setStart(0);
+                        PlaylistPagination.setEnd(10);
+                        PlaylistPagination.setMoveRange(10);
+                        PlaylistPagination.setPageNumber(1);
+//                        System.out.println("Reset the page number.");
                         isSelecting.set(false);
                     }
                     case -1 -> {

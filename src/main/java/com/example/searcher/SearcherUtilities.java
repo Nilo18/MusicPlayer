@@ -8,6 +8,8 @@ import javafx.application.Platform;
 import org.jline.terminal.Terminal;
 import org.jline.utils.InfoCmp;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
