@@ -3,12 +3,8 @@ package com.example;
 import com.google.gson.*;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class App extends Application {
@@ -23,7 +19,7 @@ public class App extends Application {
         // mp play -"name", mp loop, mp skip, mp exit
         // 1. Analyze the user input for commands
         System.out.println("************************");
-        System.out.println("MusicPlayer CLI v1.0");
+        System.out.println("JXPlayer CLI v1.0");
         System.out.println("************************");
         System.out.println();
         System.out.println("Choose one of the main commands: ");
