@@ -46,7 +46,7 @@ public class Utilities {
     }
 
     public static void exit(AtomicBoolean isRunning) {
-        System.out.println("Exiting MusicPlayer CLI...");
+        System.out.println("Exiting JXPlayer CLI...");
         isRunning.set(false);
         Platform.exit(); // Exit javafx thread
         System.exit(0); // Exit the JVM completely

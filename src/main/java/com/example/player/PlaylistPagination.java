@@ -43,23 +43,16 @@ public class PlaylistPagination {
         // readjust the move range to cover the remaining songs on the last page
         // This will avoid both out of bounds and missing out last few songs
         if (end + moveRange > playlistSize && end != playlistSize) {
-//            System.out.println("The end + moveRange exceeds playlistSize, adjusting moveRange...");
             // Calculate the difference between the end of the music and end + moveRange
             // This will determine how much should moveRange be adjusted
             int difference = 0;
-//            System.out.println("The difference initially is: " + difference);
             for (int i = end; i < playlistSize; i++) {
                 difference++;
             }
 
-//            System.out.println("The difference after counting is: " + difference);
             // Readjust the moveRange
             moveRange = difference;
-//            System.out.println("Adjusted new moveRange to: " + moveRange);
-//            moveRange = difference;
         }
-
-        // *** moveRange shouldn't remain permanently changed ***
 
         if (start + moveRange < playlistSize && end + moveRange <= playlistSize) {
             start += moveRange;
@@ -69,8 +62,6 @@ public class PlaylistPagination {
             PlayerUtilities.clearTerminal(terminal);
             // After moving forward, use shouldAdjustMoveRange to notify moveBehind to act accordingly
             shouldAdjustMoveRange = true;
-            // difference is sapirispiro unda qna
-//            moveRange = 10;
             return PlayerUtilities.printPlaylist(playlist, selectedRow, terminal);
         }
         return "";

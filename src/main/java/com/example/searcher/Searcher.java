@@ -85,7 +85,6 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
            System.out.println("Couldn't initialize the terminal.");
        } catch (Exception err) {
            System.out.println("Unexpected error has occurred while trying to show results: " + err);
-           err.printStackTrace();
        }
     }
 
@@ -105,6 +104,7 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
         ).setApplicationName("youtube-search-demo").
                 setYouTubeRequestInitializer(new YouTubeRequestInitializer(AppConfig.getDotenvValue("YOUTUBE_API_KEY"))).build();
 //            YouTube.Search.List search;
+//        System.out.println("The request initializer is: " + new YouTubeRequestInitializer(AppConfig.getDotenvValue("YOUTUBE_API_KEY")));
 
         try {
             // list() specifies which data we want to receive, snippet contains the title, thumbnail, etc.

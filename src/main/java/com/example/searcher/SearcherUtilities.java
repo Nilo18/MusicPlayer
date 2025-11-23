@@ -57,7 +57,6 @@ public class SearcherUtilities {
     public static void playResultsSelectedMusic(String selectedMusic, String url, Terminal terminal, AtomicBoolean isSelecting) {
         if (!selectedMusic.isEmpty()) {
             String trimmedSelectedMusic = selectedMusic.replace("> ", "");
-            System.out.println("trimmedSelectedMusic: " + trimmedSelectedMusic);
             Downloader.downloadVideo(trimmedSelectedMusic, url);
             isSelecting.set(false);
         }

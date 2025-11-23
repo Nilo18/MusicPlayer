@@ -18,6 +18,10 @@ public class Player {
     private MediaPlayer player;
     private Queue queue = new Queue();
     private boolean isLooped = false;
+    // Made this static so PlayerUtilities.printPlaylist() doesn't have to take it as the 4th parameter
+    // PlayerUtilities.printPlaylist() needs access to it in order to reset the selection mode
+    // in case the playlist is empty
+    private static AtomicBoolean isSelecting = new AtomicBoolean(false);
 
     public void play(Path musicPath) {
         if (player != null) {
@@ -158,14 +162,17 @@ public class Player {
     public void activatePlaylistSelectionMode() {
         List<Path> playlist = queue.getPlaylist();
         AtomicInteger selectedRow = new AtomicInteger(1);
-        AtomicBoolean isSelecting = new AtomicBoolean(true);
         String selectedMusic = "";
         try {
             Terminal terminal = TerminalBuilder.builder().system(true).build();
             terminal.enterRawMode();
             terminal.flush();
-            terminal.writer().print("\033[6n");
             terminal.writer().flush();
+            /* It is important to make this true before the initial printing
+             * because printPlaylist will set isSelecting to false if the music directory is empty
+             * and if isSelecting was set to true again after that, it would unintentionally enter
+             * the selection mode again. */
+            isSelecting.set(true);
             selectedMusic = PlayerUtilities.printPlaylist(playlist, selectedRow, terminal);
             terminal.flush();
             while (isSelecting.get()) {
@@ -198,12 +205,13 @@ public class Player {
                     // 13 stands for Enter
                     case 13 -> {
                         if (!selectedMusic.isEmpty()) {
-                            PlayerUtilities.playPlaylistMusic(selectedMusic, terminal, isSelecting);
+                            PlayerUtilities.playPlaylistMusic(selectedMusic, terminal);
                             PlaylistPagination.setStart(0);
                             PlaylistPagination.setEnd(10);
                             PlaylistPagination.setMoveRange(10);
                             PlaylistPagination.setPageNumber(1);
                             System.out.println("\nExited the selection mode.");
+//                            isSelecting.set(false);
 //                            System.out.println("Reset the page number.");
                         } else {
                             System.out.println("Missing selected music to play from the playlist.");
@@ -230,5 +238,13 @@ public class Player {
         } catch (Exception err) {
             System.out.println("Unexpected error has occurred while trying to show the playlist: " + err);
         }
+    }
+
+    public static boolean getPlaylistSelectionState() {
+        return isSelecting.get();
+    }
+
+    public static void setPlaylistSelectionMode(boolean val) {
+        isSelecting.set(val);
     }
 }

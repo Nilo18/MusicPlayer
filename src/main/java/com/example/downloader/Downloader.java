@@ -17,7 +17,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Downloader {
-//    private static final Player player = new Player();
     // title is used to name the mp3 file after downloading
     // url is used to create a valid URI string
     public static void downloadVideo(String title, String url) {
@@ -47,11 +46,13 @@ public class Downloader {
             HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
 //            System.out.println("Received the response: " + res.body());
             JsonElement rootElem = JsonParser.parseString(res.body());
+//            System.out.println("THe rootElem is: " + rootElem);
             if (!rootElem.isJsonObject()) {
                 System.out.println("Unexpected response format: not a JSON object");
                 return;
             }
             JsonObject rootObject = rootElem.getAsJsonObject();
+//            System.out.println("The rootObject is: " + rootObject);
             if (!rootObject.has("link")) {
                 System.out.println("No 'link' field in response JSON");
                 return;
@@ -88,6 +89,8 @@ public class Downloader {
             // Handle errors where the JSON response structure is unexpected or invalid
             System.err.println("JSON Parsing Error: The API response format was invalid or unexpected keys were missing. " + e.getMessage());
             // You can print the body here for debugging: System.out.println("Response Body: " + res.body());
+        } catch (IllegalArgumentException err) {
+            System.out.println("Received an IllegalArgumentException" + err);
         } catch (Exception err) {
             System.out.println("Unknown error has occurred: " + err);
         }
