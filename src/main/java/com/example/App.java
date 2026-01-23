@@ -40,6 +40,7 @@ public class App extends Application {
         }
 
         if (args[0].equals("init")) {
+//            Updater.checkForUpdates();
             launch(args);
             return;
         }

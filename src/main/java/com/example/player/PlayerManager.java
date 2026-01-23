@@ -40,6 +40,18 @@ public class PlayerManager {
         }
     }
 
+    public static void previous() {
+        if (musicPlaying) {
+            System.out.println("Playing previous...");
+            musicPlaying = false;
+            player.setLoopState(false);
+            Path prevMusic = player.getQueue().getPrevMusic();
+            play(prevMusic);
+        } else {
+            System.out.println("No previous music to go back.");
+        }
+    }
+
     public static void pause() {
         if (musicPlaying) {
             player.pause();

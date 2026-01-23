@@ -46,6 +46,23 @@ public class Queue {
         return queue.get(currentIndex);
     }
 
+    public Path getPrevMusic() {
+        if (queue.isEmpty()) {
+            return null;
+        }
+
+        // If there's no previous music, change the current index to the last index to allow wrapping to the end
+        if (currentIndex - 1 != -1) {
+            currentIndex--;
+        } else {
+            currentIndex = queue.size() - 1;
+        }
+
+//        System.out.println("currentIndex is: " + currentIndex);
+
+        return queue.get(currentIndex);
+    }
+
     public List<Path> getPlaylist() {
         return queue;
     }

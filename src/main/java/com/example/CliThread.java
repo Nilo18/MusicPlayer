@@ -95,6 +95,12 @@ public class CliThread implements Runnable {
         CommandHandler.addCommand("mp s", Pattern.compile("^mp s$"),
                 (Object... a) -> PlayerManager.skip()
         );
+        CommandHandler.addCommand("mp previous", Pattern.compile("^mp previous$"),
+                (Object... a) -> PlayerManager.previous()
+        );
+        CommandHandler.addCommand("mp prev", Pattern.compile("^mp prev$"),
+                (Object... a) -> PlayerManager.previous()
+        );
         CommandHandler.addCommand("mp pause", Pattern.compile("^mp pause$"),
             (Object... a) -> PlayerManager.pause()
         );
