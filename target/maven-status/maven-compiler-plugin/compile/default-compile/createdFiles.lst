@@ -1,3 +1,4 @@
+updater\UpdaterMain.class
 com\example\AppConfig.class
 com\example\CliThread.class
 com\example\searcher\Searcher.class
@@ -9,6 +10,7 @@ com\example\searcher\SearcherUtilities.class
 com\example\downloader\Downloader.class
 com\example\App.class
 com\example\player\PlayerManager.class
+com\example\Updater.class
 com\example\player\Queue.class
 com\example\commands\CommandFunction.class
 com\example\utilities\Utilities.class

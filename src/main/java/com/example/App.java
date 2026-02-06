@@ -11,7 +11,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         System.out.println("************************");
-        System.out.println("JXPlayer CLI v1.0.1");
+        System.out.println("JXPlayer CLI v1.1.1");
         System.out.println("************************");
         System.out.println();
         System.out.println("Choose one of the main commands: ");

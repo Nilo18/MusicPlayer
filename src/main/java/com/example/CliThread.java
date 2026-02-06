@@ -130,10 +130,7 @@ public class CliThread implements Runnable {
         );
 
         while (isRunning.get()) {
-            if (!sc.hasNextLine()) {
-                break;
-            }
-
+            System.out.print("#> ");
             String option = sc.nextLine().trim();
 
             CommandHandler.executeCommand(option);

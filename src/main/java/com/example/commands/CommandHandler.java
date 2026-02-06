@@ -12,6 +12,10 @@ public class CommandHandler {
     }
 
     public static void executeCommand(String command) {
+        if (command.trim().isEmpty()) {
+            return;
+        }
+
         // Loop over the commands and test the user input against the syntax
         // This ensures that syntax is always valid
         for (Command cmd : commands.values()) {
