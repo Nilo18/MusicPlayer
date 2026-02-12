@@ -9,8 +9,7 @@ Unlike Rhythm, this software downloads music from YouTube and plays it locally t
 3. Run install.bat as administrator
 4. Open command prompt or powershell and type `mpp init`, you should see something like:
 
-<img width="1467" height="508" alt="image" src="https://github.com/user-attachments/assets/71e8b045-b790-400c-a112-ee738ea0567b" />
-
+<img width="1466" height="492" alt="image" src="https://github.com/user-attachments/assets/4218bed9-5e84-47e9-bdd1-a78ac2a9101d" />
 
 ### Disclaimer:
 This tool is intended strictly for personal use. Music is downloaded from YouTube, so users must ensure compliance with YouTube’s Terms of Service and all applicable copyright laws. 
