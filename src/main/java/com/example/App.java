@@ -1,19 +1,27 @@
 package com.example;
 
+import com.example.utilities.Color;
 import com.example.utilities.Utilities;
+import com.github.lalyos.jfiglet.FigletFont;
 import com.google.gson.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class App extends Application {
     @Override
     public void start(Stage stage) {
-        System.out.println("************************");
-        System.out.println("JXPlayer CLI v1.2.1");
-        System.out.println("************************");
+        try {
+            String banner = FigletFont.convertOneLine("JXPlayer CLI v1.2.1");
+            System.out.println(Color.RED + banner + Color.RESET);
+        } catch (IOException e) {
+            System.out.println("***************************");
+            System.out.println("JXPlayer CLI v1.2.1");
+            System.out.println("***************************");
+        }
         System.out.println();
         System.out.println("Choose one of the main commands: ");
         System.out.println("""
