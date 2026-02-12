@@ -1,5 +1,6 @@
 package com.example;
 
+import com.example.utilities.Utilities;
 import com.google.gson.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -11,7 +12,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         System.out.println("************************");
-        System.out.println("JXPlayer CLI v1.1.1");
+        System.out.println("JXPlayer CLI v1.2.1");
         System.out.println("************************");
         System.out.println();
         System.out.println("Choose one of the main commands: ");

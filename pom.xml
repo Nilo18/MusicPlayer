@@ -58,6 +58,17 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <filters>
+            <!-- Point to your local secret file -->
+            <filter>secrets.properties</filter>
+        </filters>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering> <!-- This enables the placeholder swapping -->
+            </resource>
+        </resources>
     </build>
     <version>1.0-SNAPSHOT</version>
   <name>MusicPlayer</name>

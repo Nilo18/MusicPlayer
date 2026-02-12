@@ -6,8 +6,10 @@ import com.example.utilities.Utilities;
 import com.google.gson.*;
 import javafx.application.Platform;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -17,82 +19,62 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Downloader {
-    // title is used to name the mp3 file after downloading
-    // url is used to create a valid URI string
-    public static void downloadVideo(String title, String url) {
+    public static void downloadVideoYtDlp(String title, String url) {
         System.out.println("Downloading " + title + "...");
-        HttpClient client = HttpClient.newHttpClient();
+
+        Path mpDir = Paths.get(System.getProperty("user.home"), "MpMusic");
+
+        if (!Files.exists(mpDir)) {
+            System.out.println("Failed to detect MpMusic directory to store the music, creating it...");
+            Utilities.createDirectory(mpDir);
+        }
+
         String illegalCharactersRegex = "[\\\\/:*?\"<>|]";
-        // Replace all occurrences of these illegal characters with an underscore (_)
-        String safeTitle = title.replaceAll(illegalCharactersRegex, "_");
+        String safeTitle = title.replaceAll(illegalCharactersRegex, " ");
 
         Path filePath = Paths.get(System.getProperty("user.home"), "MpMusic", safeTitle + ".mp3");
-        // If the suggested music is already downloaded, play it directly and exit without making any HTTP reqs
         if (Files.exists(filePath)) {
             System.out.println("The suggested music has already been downloaded. Opening it locally...");
             Utilities.printCurrentMusic(title, url);
             Platform.runLater(() -> PlayerManager.play(filePath));
             return;
         }
-        // If the music isn't downloaded, make a request to the YouTube to mp3 API to download it
+
+        String userHome = System.getProperty("user.home");
+        String outputPath = userHome + "/MpMusic/" + safeTitle + ".%(ext)s";
+
+        String ytDlp = Utilities.getBinaryPath("yt-dlp");
+        String ffmpeg = Utilities.getBinaryPath("ffmpeg");
+
+        String[] splitToken = url.split("id=");
+        String id = splitToken[1];
+        String ytUrl = "https://www.youtube.com/watch?v=" + id;
+
+        ProcessBuilder pb = new ProcessBuilder(
+                ytDlp, "-U", "--ffmpeg-location", ffmpeg,
+                "--extract-audio",
+                "--audio-format", "mp3",
+                "--output", outputPath,
+                ytUrl
+        );
+
         try {
-            HttpRequest req = HttpRequest.newBuilder().
-                    uri(URI.create(url)).
-                    header("x-rapidapi-key", AppConfig.getDotenvValue("DOWNLOADER_API_KEY")).
-                    header("x-rapidapi-host", AppConfig.getDotenvValue("DOWNLOADER_API_HOST")).
-                    method("GET", HttpRequest.BodyPublishers.noBody()).
-                    build();
+            Process process = pb.inheritIO().start();
+            int exitCode = process.waitFor(); // Wait for it to finish
 
-            HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
-//            System.out.println("Received the response: " + res.body());
-            JsonElement rootElem = JsonParser.parseString(res.body());
-//            System.out.println("THe rootElem is: " + rootElem);
-            if (!rootElem.isJsonObject()) {
-                System.out.println("Unexpected response format: not a JSON object");
-                return;
-            }
-            JsonObject rootObject = rootElem.getAsJsonObject();
-//            System.out.println("The rootObject is: " + rootObject);
-            if (!rootObject.has("link")) {
-                System.out.println("No 'link' field in response JSON");
-                return;
-            }
-
-            String downloadLink = rootObject.get("link").getAsString();
-            Path mpDir = Paths.get(System.getProperty("user.home"), "MpMusic");
-            Utilities.createDirectory(mpDir);
-
-            HttpRequest downloadReq = HttpRequest.newBuilder().
-                    uri(URI.create(downloadLink)).
-                    GET().
-                    build();
-            HttpResponse<Path> downloadRes = client.send(downloadReq, HttpResponse.BodyHandlers.ofFile(filePath));
-            if (downloadRes.statusCode() == 200) {
-                System.out.println("Download was successful.");
-                Utilities.printCurrentMusic(title, url);
+            if (exitCode == 0) {
+                System.out.println("Download complete!");
+                Utilities.printCurrentMusic(safeTitle, url);
+                PlayerManager.play(filePath);
             } else {
-                System.out.println("Failed to download.");
-                return;
+                System.out.println("Download failed with exit code: " + exitCode);
             }
-            // Convert the file path to a File object so Desktop class can open it
-            File fileToOpen = filePath.toFile();
-            // Set javafx on its own thread
-            Platform.runLater(() -> PlayerManager.play(filePath));
         } catch (IOException e) {
-            // Handle network errors (e.g., connection refused, timeout)
-            System.err.println("IO exception: " + e.getMessage());
+            System.out.println("Couldn't start download process." + e);
         } catch (InterruptedException e) {
-            // Handle if the thread was interrupted while waiting
-            System.err.println("API request interrupted: " + e.getMessage());
-            Thread.currentThread().interrupt(); // Re-interrupt the thread
-        } catch (JsonSyntaxException | NullPointerException | IllegalStateException e) {
-            // Handle errors where the JSON response structure is unexpected or invalid
-            System.err.println("JSON Parsing Error: The API response format was invalid or unexpected keys were missing. " + e.getMessage());
-            // You can print the body here for debugging: System.out.println("Response Body: " + res.body());
-        } catch (IllegalArgumentException err) {
-            System.out.println("Received an IllegalArgumentException" + err);
-        } catch (Exception err) {
-            System.out.println("Unknown error has occurred: " + err);
+            System.out.println("Interruption during download. " + e);
+        } catch (Exception e) {
+            System.out.println("Unknown exception has occurred: " + e);
         }
     }
 }

@@ -1,10 +1,12 @@
 package com.example.utilities;
 
+import com.example.App;
 import javafx.application.Platform;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,12 +54,6 @@ public class Utilities {
         System.exit(0); // Exit the JVM completely
     }
 
-//    public static void playMusic(String option) {
-//        String[] token = option.split("\"");
-//        String musicName = token[0];
-//        Searcher.search(musicName, 1L);
-//    }
-
     public static void showAllCommands() {
         System.out.println();
         System.out.println("mp play -" + "NAME OF THE SONG/YOUTUBE URL" + "--- Play the desired music, the music will be downloaded (if it isn't already installed) and played locally. Shortcut: mp p -" + "NAME OF THE SONG/YOUTUBE URL");
@@ -73,4 +69,24 @@ public class Utilities {
         System.out.println();
     }
 
+    public static String getBinaryPath(String binaryName) {
+        try {
+            String os = System.getProperty("os.name").toLowerCase();
+            String jarPath = App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+            File jarDir = new File(jarPath).getParentFile();
+
+            String folder = "";
+
+            if (os.contains("win")) {
+                folder = "bin/windows/";
+                binaryName += ".exe";
+            }
+
+            File binaryFile = new File(jarDir, folder + binaryName);
+            return binaryFile.getAbsolutePath();
+        } catch (URISyntaxException e) {
+            System.out.println("Couldn't resolve binary path");
+            return "";
+        }
+    }
 }

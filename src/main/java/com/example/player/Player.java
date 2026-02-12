@@ -31,13 +31,9 @@ public class Player {
         // Add new music to queue,
         // this ensures that the program doesn't have to be restarted
         // in order for the new music to be included in the queue
-//        queue.add(musicPath);
-//        System.out.println("Media URI: " + musicPath.toUri().toString());
         System.out.println();
         Media media = new Media(musicPath.toUri().toString());
         player = new MediaPlayer(media);
-//        System.out.println("I'm running, here's the player object: " + player);
-//        System.out.println("Here's the provided path as well: " + musicPath);
 
         isLooped = false;
         // Add listener to the end of the music so it plays the next one in the queue
@@ -211,8 +207,6 @@ public class Player {
                             PlaylistPagination.setMoveRange(10);
                             PlaylistPagination.setPageNumber(1);
                             System.out.println("\nExited the selection mode.");
-//                            isSelecting.set(false);
-//                            System.out.println("Reset the page number.");
                         } else {
                             System.out.println("Missing selected music to play from the playlist.");
                         }

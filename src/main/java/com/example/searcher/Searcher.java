@@ -16,6 +16,7 @@ import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -97,14 +98,14 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
         // The first parameter pass on http transport to actually make requests
         // The second one passes a parser to parse data
         // The third one is a shorthand for HttpRequestInitializer, which initializes http requests
+        AppConfig config = new AppConfig();
+//        System.out.println("The key is: "+ config.getInjectedKey());
         YouTube youtube = new YouTube.Builder(
                 new NetHttpTransport(),
                 jsonFactory,
                 request -> {}
         ).setApplicationName("youtube-search-demo").
-                setYouTubeRequestInitializer(new YouTubeRequestInitializer(AppConfig.getDotenvValue("YOUTUBE_API_KEY"))).build();
-//            YouTube.Search.List search;
-//        System.out.println("The request initializer is: " + new YouTubeRequestInitializer(AppConfig.getDotenvValue("YOUTUBE_API_KEY")));
+                setYouTubeRequestInitializer(new YouTubeRequestInitializer(config.getInjectedKey())).build();
 
         try {
             // list() specifies which data we want to receive, snippet contains the title, thumbnail, etc.
@@ -127,7 +128,7 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
                     activateSearchSelectionMode(results);
                     return;
                 }
-                Downloader.downloadVideo(title, url);
+                Downloader.downloadVideoYtDlp(title, url);
             } else {
                 System.out.println("No such video was found.");
             }
@@ -178,8 +179,9 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
                 String videoHTML = res.body();
                 String title = extractTitle(videoHTML);
 
+                System.out.println("Downloading using yt-dlp method.");
                 // Make a request to the downloader API to download the video
-                Downloader.downloadVideo(title, url);
+                Downloader.downloadVideoYtDlp(title, url);
             }
         } catch (IOException err) {
             System.out.println("Couldn't receive response from the search: " + err);
@@ -187,6 +189,8 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
             System.out.println("The search was interrupted: " + err);
         } catch (IllegalArgumentException err) {
             System.out.println("Invalid URL argument: " + err);
+        } catch (Exception err) {
+            System.out.println("Unknown exception occurred during search: " + err);
         }
     }
 
@@ -195,13 +199,20 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
         String musicName = token[0];
         // If the user entering a URL extract the id of the video from it using Jsoup
         // Else search by the name using YouTube API
-        if (musicName.contains("https://www.youtube.com/watch?v=")) {
+        // * For multiple query params
+        if (musicName.contains("https://www.youtube.com/watch?v=") && musicName.contains("&")) {
             System.out.println("Searching " + musicName + "...");
             String[] splitToken = musicName.split("v=");
             String queryParams = splitToken[1];
             int delimiterIndex = queryParams.indexOf("&");
             String id = queryParams.substring(0, delimiterIndex);
             searchByURL(id);
+        }
+        // * For a single query param (id)
+        else if (musicName.contains("https://www.youtube.com/watch?v=") && !musicName.contains("&")) {
+            String[] splitToken = musicName.split("v=");
+            String queryParams = splitToken[1];
+            searchByURL(queryParams);
         } else if (musicName.contains("https://") && !musicName.contains("www.youtube.com/watch?v=")) {
             System.out.println("Only valid youtube video URLs are allowed.");
         } else {
