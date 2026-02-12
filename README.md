@@ -11,6 +11,11 @@ Unlike Rhythm, this software downloads music from YouTube and plays it locally t
 
 <img width="1466" height="492" alt="image" src="https://github.com/user-attachments/assets/4218bed9-5e84-47e9-bdd1-a78ac2a9101d" />
 
+# Cloning Instructions
+If you want to clone this repository you'll have to add secrets.properties in your project root with the following value:
+`YOUTUBE_API_KEY=your_key_here` 
+Note: Ensure secrets.properties is added to your .gitignore so you don't accidentally share your API key.
+
 ### Disclaimer:
 This tool is intended strictly for personal use. Music is downloaded from YouTube, so users must ensure compliance with YouTube’s Terms of Service and all applicable copyright laws. 
 The developer is not responsible for any misuse or distribution of downloaded content.
