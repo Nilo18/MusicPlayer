@@ -3,7 +3,7 @@ package com.example.searcher;
 import com.example.utilities.Color;
 import com.example.downloader.Downloader;
 import com.example.player.PlayerManager;
-import com.google.api.services.youtube.model.SearchResult;
+//import com.google.api.services.youtube.model.SearchResult;
 import javafx.application.Platform;
 import org.jline.terminal.Terminal;
 import org.jline.utils.InfoCmp;
@@ -19,7 +19,7 @@ public class SearcherUtilities {
         String selectedResult = "";
         for (int i = 0; i < results.size(); i++) {
             String prefix = "> ";
-            String musicName = results.get(i).getSnippet().getTitle();
+            String musicName = results.get(i).getTitle();
             if (i + 1 == selectedRow.get()) {
                 terminal.writer().println(Color.BLUE + prefix + musicName + Color.RESET);
                 selectedResult = musicName;

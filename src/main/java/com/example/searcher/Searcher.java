@@ -2,20 +2,25 @@ package com.example.searcher;
 
 import com.example.AppConfig;
 import com.example.downloader.Downloader;
+import com.example.utilities.Utilities;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeRequestInitializer;
 import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.SearchResult;
+//import com.google.api.services.youtube.model.SearchResult;
+//import com.example.searcher.SearchResult;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -62,13 +67,15 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
                     AtomicReference<String> url = new AtomicReference<>("");
                     // Construct downloader API url by extracting the video from the selected music
                     Optional<SearchResult> found = results.stream()
-                            .filter(result -> result.getSnippet().getTitle().equals(finalSelectedMusic))
+                            .filter(result -> result.getTitle().equals(finalSelectedMusic))
                             .findFirst();
                     found.ifPresent(match -> {
-                       String videoId = match.getId().getVideoId();
-                       url.set("https://youtube-mp36.p.rapidapi.com/dl?id=" + videoId);
+                       String videoId = match.getId();
+                       url.set(videoId);
                     });
-                    SearcherUtilities.playResultsSelectedMusic(selectedMusic, String.valueOf(url.get()), terminal, isSelecting);
+                    SearcherUtilities.playResultsSelectedMusic(
+                            selectedMusic, String.valueOf(url.get()), terminal, isSelecting
+                    );
                 }
                 // 133 stands for q
                 case 113 -> {
@@ -90,58 +97,48 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
     }
 
     public static void searchByKeyword(String keyword, Long amount) {
-        // JsonFactory is an interface which defines how a json parser should behave
-        // GsonFactory.getDefaultInstance() sets up the parser with the default settings
-        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-        // setApplicationName() will notify google which app is making a request to their API
-        // YouTubeRequestInitializer injects the API key to every request
-        // The first parameter pass on http transport to actually make requests
-        // The second one passes a parser to parse data
-        // The third one is a shorthand for HttpRequestInitializer, which initializes http requests
-        AppConfig config = new AppConfig();
-//        System.out.println("The key is: "+ config.getInjectedKey());
-        YouTube youtube = new YouTube.Builder(
-                new NetHttpTransport(),
-                jsonFactory,
-                request -> {}
-        ).setApplicationName("youtube-search-demo").
-                setYouTubeRequestInitializer(new YouTubeRequestInitializer(config.getInjectedKey())).build();
-
-        try {
-            // list() specifies which data we want to receive, snippet contains the title, thumbnail, etc.
-            YouTube.Search.List search = youtube.search().list("id, snippet");
-            search.setQ(keyword); // Set the query to the suggested song name
-            search.setType("video"); // Set the type of the request to video
-            search.setMaxResults(amount); // L is used here because the method expects long
-
-            // This will send the request to the YouTube's servers and wait for the response
-            SearchListResponse response = search.execute();
-            // This will turn all the returned video items into a java list
-            List<SearchResult> results = response.getItems();
-
-            if (results != null && !results.isEmpty()) {
-                SearchResult video = results.get(0); // only item
-                String title = video.getSnippet().getTitle();
-
-                String url = "https://youtube-mp36.p.rapidapi.com/dl?id=" + video.getId().getVideoId();
-                if (amount > 1L) {
-                    activateSearchSelectionMode(results);
-                    return;
+            String ytDlp = Utilities.getBinaryPath("yt-dlp");
+            ProcessBuilder pb = new ProcessBuilder(
+                    ytDlp, "ytsearch" + amount + ":" + keyword,
+                    "--skip-download", "--print", "%(id)s | %(title)s", "--no-playlist",
+                    "--quiet"
+            );
+            List<SearchResult> results = new ArrayList<>();
+            try {
+                Process process = pb.start();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] parts = line.split(" \\| ");
+                        if (parts.length >= 2) {
+                            results.add(new SearchResult(parts[0], parts[1]));
+                        }
+                    }
                 }
-                Downloader.downloadVideoYtDlp(title, url);
-            } else {
-                System.out.println("No such video was found.");
-            }
-        }
-        // If there's no internet, look for the music locally
-        catch (UnknownHostException err) {
-            SearcherUtilities.handleNoInternet(keyword);
-        } catch (IOException err) {
-            System.out.println("Couldn't receive response from the search: " + err);
 
-        } catch (Exception err) {
-            System.err.println("An error occurred during download, please try again.");
-        }
+                process.waitFor();
+
+                if (!results.isEmpty()) {
+                    if (amount > 1) {
+                        // Pass the list to your existing selection logic
+                        activateSearchSelectionMode(results);
+                    } else {
+                        // Immediate mode for "amount = 1"
+                        SearchResult video = results.get(0);
+                        String title = video.getTitle();
+                        String videoId = video.getId();
+
+                        // Note: You can now bypass the RapidAPI and use yt-dlp directly for the download!
+                        Downloader.downloadVideoYtDlp(title, videoId);
+                    }
+                } else {
+                    System.out.println("No such video was found.");
+                }
+            } catch (IOException e) {
+                System.out.println("Couldn't start search process." + e);
+            } catch (InterruptedException e) {
+                System.out.println("Search process was interrupted: " + e);
+            }
     }
 
     // Private method for extracting the title to name the mp3 video
@@ -163,35 +160,48 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
     }
 
     public static void searchByURL(String id) {
-        String url = "https://youtube-mp36.p.rapidapi.com/dl?id=" + id;
         String youtubeURL = "https://www.youtube.com/watch?v=" + id;
+        String ytDlp = Utilities.getBinaryPath("yt-dlp");
+        ProcessBuilder pb = new ProcessBuilder(
+                ytDlp, youtubeURL,
+                "--skip-download", "--print", "%(id)s | %(title)s", "--no-playlist",
+                "--quiet"
+        );
         try {
-            HttpClient client = HttpClient.newHttpClient();
-            // Make a request to the given YouTube music video page
-            HttpRequest req = HttpRequest.newBuilder().
-                    uri(URI.create(youtubeURL)).
-                    header("User-Agent", "Mozilla/5.0").
-                    build();
+            Process process = pb.start();
 
-            HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
-            if (res.statusCode() == 200) {
-                // If the page was found parse the HTML and extract the title
-                String videoHTML = res.body();
-                String title = extractTitle(videoHTML);
+            SearchResult video = getSearchResult(process);
+            int exitCode = process.waitFor();
 
-                System.out.println("Downloading using yt-dlp method.");
-                // Make a request to the downloader API to download the video
-                Downloader.downloadVideoYtDlp(title, url);
+            if (video != null && exitCode == 0) {
+                // Pass title and ID directly to your downloader
+                Downloader.downloadVideoYtDlp(video.getTitle(), video.getId());
+            } else {
+                System.out.println("No such video was found or the process failed.");
             }
-        } catch (IOException err) {
-            System.out.println("Couldn't receive response from the search: " + err);
-        } catch (InterruptedException err) {
-            System.out.println("The search was interrupted: " + err);
-        } catch (IllegalArgumentException err) {
-            System.out.println("Invalid URL argument: " + err);
-        } catch (Exception err) {
-            System.out.println("Unknown exception occurred during search: " + err);
+        } catch (IOException e) {
+            System.out.println("Couldn't start search process." + e);
+        } catch (InterruptedException e) {
+            System.out.println("Search process was interrupted." + e);
         }
+    }
+
+    private static SearchResult getSearchResult(Process process)  {
+        SearchResult video = null;
+
+        // Use try-with-resources to automatically close the reader
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(" \\| ");
+                if (parts.length >= 2) {
+                    video = new SearchResult(parts[0], parts[1]);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Couldn't read video metadata: " + e);
+        }
+        return video;
     }
 
     public static void search(String option, Long amount) {

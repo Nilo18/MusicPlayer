@@ -33,7 +33,7 @@ public class Utilities {
         System.out.println("Now playing:");
         System.out.println("\nTitle: " + videoTitle);
         String[] splitToken = videoURL.split("id=");
-        String id = splitToken[1];
+        String id = splitToken[0];
         System.out.println("URL: https://www.youtube.com/watch?v=" + id);
     }
 

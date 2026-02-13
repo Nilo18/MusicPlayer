@@ -17,6 +17,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 public class Downloader {
     public static void downloadVideoYtDlp(String title, String url) {
@@ -47,7 +48,7 @@ public class Downloader {
         String ffmpeg = Utilities.getBinaryPath("ffmpeg");
 
         String[] splitToken = url.split("id=");
-        String id = splitToken[1];
+        String id = splitToken[0];
         String ytUrl = "https://www.youtube.com/watch?v=" + id;
 
         ProcessBuilder pb = new ProcessBuilder(
