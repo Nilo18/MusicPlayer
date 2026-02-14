@@ -1,7 +1,8 @@
 # Overview
 This project was created as an alternative to the Discord Rhythm bot. After encountering issues such as poor streaming quality with Rhythm, 
 I decided to develop my own tool to play music via command line. 
-Unlike Rhythm, this software downloads music from YouTube and plays it locally through a Command Line Interface (CLI), rather than streaming it.
+Unlike Rhythm, this software downloads music from YouTube and plays it locally through a Command Line Interface (CLI), rather than streaming it, it uses yt-dlp under the hood for searching and downloading.
+Once initialized, the app launches a subshell process where you can play your desired music and get complete control over the playback, including pausing, skipping, rewinding/forwarding and looping.
 
 # How to install
 1. Check for the latest versions in the releases
@@ -10,11 +11,6 @@ Unlike Rhythm, this software downloads music from YouTube and plays it locally t
 4. Open command prompt or powershell and type `mpp init`, you should see something like:
 
 <img width="1466" height="492" alt="image" src="https://github.com/user-attachments/assets/4218bed9-5e84-47e9-bdd1-a78ac2a9101d" />
-
-# Cloning Instructions
-If you want to clone this repository you'll have to add secrets.properties in your project root with the following value:
-`YOUTUBE_API_KEY=your_key_here` 
-Note: Ensure secrets.properties is added to your .gitignore so you don't accidentally share your API key.
 
 ### Disclaimer:
 This tool is intended strictly for personal use. Music is downloaded from YouTube, so users must ensure compliance with YouTube’s Terms of Service and all applicable copyright laws. 
