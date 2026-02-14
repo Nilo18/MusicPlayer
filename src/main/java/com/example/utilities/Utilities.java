@@ -70,23 +70,27 @@ public class Utilities {
     }
 
     public static String getBinaryPath(String binaryName) {
-        try {
-            String os = System.getProperty("os.name").toLowerCase();
-            String jarPath = App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-            File jarDir = new File(jarPath).getParentFile();
+        String os = System.getProperty("os.name").toLowerCase();
 
-            String folder = "";
+        String rootPath = System.getProperty("user.dir");
+        File projectRoot = new File(rootPath);
 
-            if (os.contains("win")) {
-                folder = "bin/windows/";
-                binaryName += ".exe";
-            }
+        File binDir = new File(projectRoot, "src/main/bin");
 
-            File binaryFile = new File(jarDir, folder + binaryName);
-            return binaryFile.getAbsolutePath();
-        } catch (URISyntaxException e) {
-            System.out.println("Couldn't resolve binary path");
-            return "";
+        String subFolder = "";
+        if (os.contains("win")) {
+            subFolder = "windows";
+            binaryName += ".exe";
+        } else if (os.contains("mac")) {
+            subFolder = "macos";
+        } else {
+            subFolder = "linux";
         }
+
+        // Combine: MusicPlayer/src/main/bin + windows + yt-dlp.exe
+        File platformFolder = new File(binDir, subFolder);
+        File binaryFile = new File(platformFolder, binaryName);
+
+        return binaryFile.getAbsolutePath();
     }
 }
