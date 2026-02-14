@@ -6,6 +6,7 @@ com\example\commands\CommandHandler.class
 com\example\player\PlayerUtilities.class
 com\example\player\Player.class
 com\example\player\Player$1.class
+com\example\Launcher.class
 com\example\searcher\SearchResult.class
 com\example\searcher\SearcherUtilities.class
 com\example\downloader\Downloader.class
@@ -13,6 +14,7 @@ com\example\App.class
 com\example\player\PlayerManager.class
 com\example\Updater.class
 com\example\player\Queue.class
+com\example\Launcher$1.class
 com\example\commands\CommandFunction.class
 com\example\utilities\Utilities.class
 com\example\player\PlaylistPagination.class
