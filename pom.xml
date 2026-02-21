@@ -105,19 +105,6 @@
   </dependency>
 
       <dependency>
-          <groupId>io.github.gaeqs</groupId>
-          <artifactId>JavaYoutubeDownloader</artifactId>
-          <version>1.2.3</version>
-      </dependency>
-
-      <dependency>
-          <groupId>com.github.sealedtx</groupId>
-          <artifactId>java-youtube-downloader</artifactId>
-          <version>3.3.1</version>
-      </dependency>
-
-
-      <dependency>
           <groupId>org.openjfx</groupId>
           <artifactId>javafx-controls</artifactId>
           <version>23.0.1</version>
@@ -203,12 +190,30 @@
           <version>3.23.0</version>
       </dependency>
 
+      <dependency>
+          <groupId>org.jline</groupId>
+          <artifactId>jline-console-ui</artifactId>
+          <version>3.30.6</version>
+      </dependency>
 
       <dependency>
           <groupId>com.github.lalyos</groupId>
           <artifactId>jfiglet</artifactId>
           <version>0.0.8</version>
       </dependency>
+
+      <!-- This allows JLine to use native Windows APIs for scrolling -->
+      <dependency>
+          <groupId>org.jline</groupId>
+          <artifactId>jline-terminal-jna</artifactId>
+          <version>3.26.0</version>
+      </dependency>
+      <dependency>
+          <groupId>net.java.dev.jna</groupId>
+          <artifactId>jna</artifactId>
+          <version>5.13.0</version>
+      </dependency>
+
 
   </dependencies>
 </project>

@@ -1,6 +1,7 @@
 package com.example.player;
 
 import com.example.utilities.Color;
+import org.jline.consoleui.prompt.builder.ListPromptBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.utils.InfoCmp;
 
@@ -19,64 +20,39 @@ public class PlayerUtilities {
         terminal.flush();
     }
 
-    public static String printPlaylist(List<Path> playlist, AtomicInteger selectedRow, Terminal terminal) {
+    public static void printPlaylist(List<Path> playlist, ListPromptBuilder listBuilder, Terminal terminal) {
         if (playlist.isEmpty()) {
             System.out.println("The playlist is empty.");
             Player.setPlaylistSelectionMode(false);
-            return "";
+            return;
         }
 
         if (playlist.size() < 10) {
             PlaylistPagination.setEnd(playlist.size());
         }
 
-        String selectedMusic = "";
-        System.out.println("Press ARROW UP or ARROW DOWN to navigate over the list.");
-        System.out.println("Press ARROW RIGHT or ARROW LEFT to change pages.");
-        System.out.println("Press ENTER to select and play the desired music and q to exit.");
-        System.out.println("Viewing page " + PlaylistPagination.getPageNumber());
+        listBuilder.newItem("PREV").text(" << Previous Page").add();
+        listBuilder.newItem("NEXT").text(" >> Next Page").add();
+        listBuilder.newItem("QUIT").text("[X] Exit selection mode").add();
 
-        System.out.println("Size of the playlist is: " + PlayerManager.getQueue().getPlaylist().size());
         for (int i = PlaylistPagination.getStart(); i < PlaylistPagination.getEnd(); i++) {
-//            System.out.println("The i is: " + i);
             String[] tokens = playlist.get(i).toString().split("MpMusic\\\\");
             String musicName = tokens[1];
-            String prefix = "> ";
-            if (i + 1 == selectedRow.get()) {
-                terminal.writer().println(Color.BLUE + prefix + musicName + Color.RESET);
-                selectedMusic = musicName;
-            } else {
-                terminal.writer().println(prefix + musicName);
-            }
+            listBuilder.newItem(String.valueOf(i)).text(musicName).add();
         }
-        return selectedMusic;
     }
-
-    // AtomicInteger is used to make sure that this method modifies the original selectedRow variable
-    public static String moveUpOnPlaylist(List<Path> playlist, AtomicInteger selectedRow, Terminal terminal) {
-        if (selectedRow.get() > PlaylistPagination.getStart() + 1) selectedRow.decrementAndGet();
-        clearTerminal(terminal);
-        return printPlaylist(playlist, selectedRow, terminal);
-    }
-
-
-
-    public static String moveDownOnPlaylist(List<Path> playlist, AtomicInteger selectedRow, Terminal terminal) {
-        if (selectedRow.get() <= PlaylistPagination.getEnd() - 1) selectedRow.incrementAndGet();
-        clearTerminal(terminal);
-        return printPlaylist(playlist, selectedRow, terminal);
-    }
-
 
     public static void playPlaylistMusic(String selectedMusic, Terminal terminal) {
         if (!selectedMusic.isEmpty()) {
-            String trimmedSelectedMusic = selectedMusic.replace("> ", "");
-            Path filePath = Paths.get(System.getProperty("user.home"), "MpMusic", trimmedSelectedMusic);
+            String[] tokens = selectedMusic.split("MpMusic\\\\");
+            String musicName = tokens[1];
+            System.out.println("Trimmed the music name to: " + musicName);
+            Path filePath = Paths.get(System.getProperty("user.home"), "MpMusic", musicName);
             if (!Files.exists(filePath)) {
                 terminal.writer().println("Could not find the given music file.");
                 return;
             }
-            terminal.writer().println("Playing: " + trimmedSelectedMusic + "...");
+            terminal.writer().println("Playing: " + musicName + "...");
             PlayerManager.play(filePath);
             Player.setPlaylistSelectionMode(false);
         }

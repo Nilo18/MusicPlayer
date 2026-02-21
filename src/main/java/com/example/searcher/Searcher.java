@@ -20,16 +20,19 @@ import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jline.consoleui.prompt.ConsolePrompt;
+import org.jline.consoleui.prompt.PromptResultItemIF;
+import org.jline.consoleui.prompt.builder.ListPromptBuilder;
+import org.jline.consoleui.prompt.builder.PromptBuilder;
+import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.InfoCmp;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -37,55 +40,46 @@ public class Searcher {
 /* Enters a mode where user can choose between the searched results using arrows */
 public static void activateSearchSelectionMode(List<SearchResult> results) {
     AtomicBoolean isSelecting = new AtomicBoolean(true);
-    AtomicInteger selectedRow = new AtomicInteger(1);
-    String selectedMusic = "";
+    Terminal terminal = null;
+    Attributes originalAttributes = null;
     try {
-        Terminal terminal = TerminalBuilder.builder().system(true).build();
-        terminal.enterRawMode();
+        terminal = TerminalBuilder.builder().system(true).build();
+        originalAttributes = terminal.getAttributes();
         terminal.flush();
-        terminal.writer().print("\033[6n");
-        terminal.writer().flush();
-        selectedMusic = SearcherUtilities.printResults(results, selectedRow, terminal);
-        terminal.flush();
-        while (isSelecting.get()) {
-            int ch = terminal.reader().read();
+        terminal.puts(InfoCmp.Capability.cursor_invisible);
+        ConsolePrompt prompt = new ConsolePrompt(terminal);
+        PromptBuilder builder = prompt.getPromptBuilder();
+        ListPromptBuilder listBuilder = builder.createListPrompt().
+                name("search").
+                message("Choose one of the 5 results:");
 
-            switch(ch) {
-                // 65 stands for arrow up
-                case 65 -> {
-                    selectedMusic = SearcherUtilities.moveUpOnSearchResults(results, selectedRow, terminal);
-                    terminal.flush();
-                }
-                // 66 stands for arrow down
-                case 66 -> {
-                    selectedMusic = SearcherUtilities.moveDownOnSearchResults(results, selectedRow, terminal);
-                    terminal.flush();
-                }
-                // 13 stands for Enter
-                case 13 -> {
-                    String finalSelectedMusic = selectedMusic;
-                    AtomicReference<String> url = new AtomicReference<>("");
-                    // Construct downloader API url by extracting the video from the selected music
-                    Optional<SearchResult> found = results.stream()
-                            .filter(result -> result.getTitle().equals(finalSelectedMusic))
-                            .findFirst();
-                    found.ifPresent(match -> {
-                       String videoId = match.getId();
-                       url.set(videoId);
-                    });
-                    SearcherUtilities.playResultsSelectedMusic(
-                            selectedMusic, String.valueOf(url.get()), terminal, isSelecting
-                    );
-                }
-                // 133 stands for q
-                case 113 -> {
-                    System.out.println("Pressing q");
-                    System.out.println("\nExited the selection mode.");
-                    isSelecting.set(false);
-                }
-                case -1 -> {
-                    isSelecting.set(false);
-                }
+        for (int i = 0; i < results.size(); i++) {
+            listBuilder.newItem(String.valueOf(i)).text(results.get(i).getTitle()).add();
+        }
+        listBuilder.newItem("QUIT").text("[X] Exit selection mode").add();
+        listBuilder.addPrompt();
+
+        Map<String, PromptResultItemIF> res = prompt.prompt(builder.build());
+
+        PromptResultItemIF selectedItem = res.get("search");
+
+        if (selectedItem != null) {
+            String selectId = selectedItem.getResult();
+
+            if (!selectId.equals("QUIT")) {
+                int index = Integer.parseInt(selectId);
+                SearcherUtilities.playResultsSelectedMusic(
+                        results.get(index).getTitle(),
+                        results.get(index).getId(),
+                        terminal, isSelecting
+                );
+                terminal.puts(InfoCmp.Capability.cursor_normal);
+            } else {
+                terminal.setAttributes(originalAttributes);
+                terminal.puts(InfoCmp.Capability.cursor_normal);
+                terminal.flush();
+                terminal.close();
+                return;
             }
         }
       terminal.close();
@@ -94,6 +88,13 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
        } catch (Exception err) {
            System.out.println("Unexpected error has occurred while trying to show results: " + err);
        }
+    finally {
+            if (terminal != null && originalAttributes != null) {
+                terminal.setAttributes(originalAttributes);
+                terminal.puts(InfoCmp.Capability.cursor_normal);
+                terminal.flush();
+            }
+        }
     }
 
     public static void searchByKeyword(String keyword, Long amount) {

@@ -4,13 +4,20 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import org.jline.consoleui.prompt.ConsolePrompt;
+import org.jline.consoleui.prompt.PromptResultItemIF;
+import org.jline.consoleui.prompt.builder.ListPromptBuilder;
+import org.jline.consoleui.prompt.builder.PromptBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.InfoCmp;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -157,80 +164,83 @@ public class Player {
     /* Enters a mode where user can choose between the playlist using arrows */
     public void activatePlaylistSelectionMode() {
         List<Path> playlist = queue.getPlaylist();
-        AtomicInteger selectedRow = new AtomicInteger(1);
-        String selectedMusic = "";
+        Terminal terminal = null;
         try {
-            Terminal terminal = TerminalBuilder.builder().system(true).build();
-            terminal.enterRawMode();
+            terminal = TerminalBuilder.builder().system(true).build();
             terminal.flush();
             terminal.writer().flush();
-            /* It is important to make this true before the initial printing
-             * because printPlaylist will set isSelecting to false if the music directory is empty
-             * and if isSelecting was set to true again after that, it would unintentionally enter
-             * the selection mode again. */
-            isSelecting.set(true);
-            selectedMusic = PlayerUtilities.printPlaylist(playlist, selectedRow, terminal);
+
+            Thread.sleep(50);
+            // Inside mp list, before prompt.prompt()
+            while (terminal.reader().available() > 0) {
+                int ch  = terminal.reader().read();
+                System.out.println(ch);
+            }
+
+            terminal.puts(InfoCmp.Capability.enter_ca_mode);
+            terminal.puts(InfoCmp.Capability.cursor_invisible);
             terminal.flush();
+            isSelecting.set(true);
+            label:
             while (isSelecting.get()) {
-                int ch = terminal.reader().read();
+                terminal.puts(InfoCmp.Capability.clear_screen);
+                ConsolePrompt prompt = new ConsolePrompt(terminal);
+                PromptBuilder builder = prompt.getPromptBuilder();
+                ListPromptBuilder listBuilder = builder.createListPrompt().
+                        name("selection").
+                        message("Press ARROW UP or ARROW DOWN to navigate over the list.").
+                        message("Press ARROW RIGHT or ARROW LEFT to change pages.").
+                        message("Viewing page " + PlaylistPagination.getPageNumber());
 
-                switch(ch) {
-                    // 65 stands for arrow up
-                    case 65 -> {
-                        selectedMusic = PlayerUtilities.moveUpOnPlaylist(playlist, selectedRow, terminal);
-                        terminal.flush();
-                    }
-                    // 66 stands for arrow down
-                    case 66 -> {
-                        selectedMusic = PlayerUtilities.moveDownOnPlaylist(playlist, selectedRow, terminal);
-                        terminal.flush();
-                    }
+                PlayerUtilities.printPlaylist(playlist, listBuilder, terminal);
 
-                    // 67 stands for arrow right
-                    case 67 -> {
-                        selectedMusic = PlaylistPagination.moveForward(playlist, selectedRow, terminal);
-                        terminal.flush();
-                    }
+                listBuilder.addPrompt();
+                Map<String, PromptResultItemIF> result = prompt.prompt(builder.build());
+                if (result == null) {
+                    isSelecting.set(false);
+                    break;
+                }
+                PromptResultItemIF selectedItem = result.get("selection");
 
-                    // 68 stands for arrow left
-                    case 68 -> {
-                        selectedMusic = PlaylistPagination.moveBehind(playlist, selectedRow, terminal);
-                        terminal.flush();
-                    }
+                if (selectedItem != null) {
+                    String selectId = selectedItem.getResult();
 
-                    // 13 stands for Enter
-                    case 13 -> {
-                        if (!selectedMusic.isEmpty()) {
-                            PlayerUtilities.playPlaylistMusic(selectedMusic, terminal);
-                            PlaylistPagination.setStart(0);
-                            PlaylistPagination.setEnd(10);
-                            PlaylistPagination.setMoveRange(10);
-                            PlaylistPagination.setPageNumber(1);
-                            System.out.println("\nExited the selection mode.");
-                        } else {
-                            System.out.println("Missing selected music to play from the playlist.");
-                        }
-                    }
-                    // 133 stands for q
-                    case 113 -> {
-                        System.out.println("\nExited the selection mode.");
-                        PlaylistPagination.setStart(0);
-                        PlaylistPagination.setEnd(10);
-                        PlaylistPagination.setMoveRange(10);
-                        PlaylistPagination.setPageNumber(1);
-//                        System.out.println("Reset the page number.");
-                        isSelecting.set(false);
-                    }
-                    case -1 -> {
-                        isSelecting.set(false);
+                    switch (selectId) {
+                        case "NEXT":
+                            PlaylistPagination.moveForward(playlist, terminal, listBuilder);
+                            break;
+                        case "PREV":
+                            PlaylistPagination.moveBehind(playlist, terminal, listBuilder);
+                            break;
+                        case "QUIT":
+                            isSelecting.set(false);
+                            terminal.puts(InfoCmp.Capability.cursor_normal);
+                            terminal.puts(InfoCmp.Capability.exit_ca_mode);
+                            terminal.flush();
+                            break label;
+                        default:
+                            int musicIndex = Integer.parseInt(selectId);
+                            PlayerUtilities.playPlaylistMusic(String.valueOf(playlist.get(musicIndex)), terminal);
+                            terminal.puts(InfoCmp.Capability.cursor_normal);
+                            terminal.puts(InfoCmp.Capability.exit_ca_mode);
+                            terminal.flush();
+                            isSelecting.set(false);
+                            break label;
                     }
                 }
             }
+
             terminal.close();
         } catch (IOException err) {
             System.out.println("Couldn't initialize the terminal.");
         } catch (Exception err) {
             System.out.println("Unexpected error has occurred while trying to show the playlist: " + err);
+        } finally {
+            if (terminal != null) {
+                terminal.puts(InfoCmp.Capability.cursor_normal);
+                terminal.puts(InfoCmp.Capability.exit_ca_mode);
+                terminal.flush();
+            }
         }
     }
 

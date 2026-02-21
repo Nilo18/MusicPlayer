@@ -45,9 +45,7 @@ public class Downloader {
         String outputPath = userHome + "/MpMusic/" + safeTitle + ".%(ext)s";
 
         String ytDlp = Utilities.getBinaryPath("yt-dlp");
-        System.out.println("yt-dlp path is: " + ytDlp);
         String ffmpeg = Utilities.getBinaryPath("ffmpeg");
-        System.out.println("ffmpeg path is: " + ffmpeg);
 
         String[] splitToken = url.split("id=");
         String id = splitToken[0];
