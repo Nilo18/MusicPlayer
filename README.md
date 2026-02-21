@@ -15,6 +15,7 @@ Once initialized, the app launches a subshell process where you can play your de
 <img width="1466" height="492" alt="image" src="https://github.com/user-attachments/assets/4218bed9-5e84-47e9-bdd1-a78ac2a9101d" />
 
 # Cloning Instructions
+**IMPORTANT, APPLIES TO BOTH SCENARIOS: After cloning make sure to download the binaries from bin.zip, unzip them and drop them in /src/main/**
 - If you're using intellij to clone, make sure you have this config setup after cloning
 <img width="989" height="852" alt="image" src="https://github.com/user-attachments/assets/f3949cda-eb3f-49b1-a7ae-f12a2cb66e4b" />
 
