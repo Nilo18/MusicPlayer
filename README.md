@@ -6,13 +6,17 @@ Once initialized, the app launches a subshell process where you can play your de
 
 **NOTE: The project is still in early deployment phase and is only available for Windows for now because of testing purposes, if you think that the project is worth contributing and want to help by making it cross-platform or adding features, check contribution guidelines below**
 
+# Demo
+https://drive.google.com/file/d/1gt9cnx6hCZgApgqARWos7MlA7JIxUVR5/view?usp=drive_link
+
 # How to install
 1. Check for the latest versions in the releases
 2. Download the zip folder and extract
 3. Run install.bat as administrator
-4. Open command prompt or powershell and type `mpp init`, you should see something like:
+4. Open command prompt or powershell and type `can init`, you should see something like:
 
-<img width="1466" height="492" alt="image" src="https://github.com/user-attachments/assets/4218bed9-5e84-47e9-bdd1-a78ac2a9101d" />
+<img width="1474" height="489" alt="image" src="https://github.com/user-attachments/assets/bbb822c9-59a2-4592-a8ca-0336399ceea0" />
+
 
 # Cloning Instructions
 **IMPORTANT, APPLIES TO BOTH SCENARIOS: After cloning make sure to download the binaries from bin.zip, unzip them and drop them in /src/main/**
