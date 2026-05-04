@@ -1,6 +1,10 @@
 package com.example.player;
 
+import javafx.util.Duration;
+
+import java.net.URI;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 // Class to ensure that the whole application is working with a single player while running
 public class PlayerManager {
@@ -18,10 +22,13 @@ public class PlayerManager {
             player.loop();
             player.setLoopState(true);
             System.out.println("Looped.");
+            System.out.print("#> ");
         } else if (player.isLooping()) {
             System.out.println("The music has already been looped.");
+            System.out.print("#> ");
         } else {
             System.out.println("No music to loop.");
+            System.out.print("#> ");
         }
     }
 
@@ -109,5 +116,21 @@ public class PlayerManager {
 
     public static Queue getQueue() {
         return player.getQueue();
+    }
+
+    public static Player getPlayer() {
+        return player;
+    }
+
+    public static Path getCurrentMusic() {
+       return player.getCurrentMusic();
+    }
+
+    public static Duration getTotalDuration() {
+        return player.getTotalDuration();
+    }
+
+    public static Duration getCurrentTime() {
+        return player.getCurrentTime();
     }
 }

@@ -10,4 +10,12 @@ public class Command {
         this.syntax = syntax;
         this.function = function;
     }
+
+    @Override
+    public String toString() {
+        return "Command{" +
+                "syntax=" + syntax +
+                ", function=" + function +
+                '}';
+    }
 }

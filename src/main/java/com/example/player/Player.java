@@ -1,5 +1,11 @@
 package com.example.player;
 
+import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.UnsupportedTagException;
+import ddf.minim.AudioPlayer;
+import ddf.minim.Minim;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
@@ -12,22 +18,22 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.InfoCmp;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Player {
     private MediaPlayer player;
     private Queue queue = new Queue();
     private boolean isLooped = false;
-    // Made this static so PlayerUtilities.printPlaylist() doesn't have to take it as the 4th parameter
-    // PlayerUtilities.printPlaylist() needs access to it in order to reset the selection mode
-    // in case the playlist is empty
     private static AtomicBoolean isSelecting = new AtomicBoolean(false);
 
     public void play(Path musicPath) {
@@ -64,6 +70,26 @@ public class Player {
     public void playNext() {
         Path nextMusic = queue.getNextMusic();
         if (nextMusic != null) {
+            try {
+                Mp3File mp3File = new Mp3File(nextMusic);
+
+                if (mp3File.hasId3v2Tag()) {
+                    ID3v2 id3v2Tag = mp3File.getId3v2Tag();
+                    System.out.println();
+                    System.out.println("Now playing: " + id3v2Tag.getTitle());
+                    long lengthInSeconds = mp3File.getLengthInSeconds();
+                    long minutes = lengthInSeconds / 60;
+                    long seconds = lengthInSeconds % 60;
+                    System.out.printf("Duration: %d:%02d%n", minutes, seconds);
+                    System.out.println("Artist: " + id3v2Tag.getArtist());
+                }
+            } catch (IOException e) {
+                System.out.println("Couldn't retrieve metadata from music: " + e);
+            } catch (UnsupportedTagException e) {
+                System.out.println("Unsupported tag detected: " + e);
+            } catch (InvalidDataException e) {
+                System.out.println("The retrieved metadata is invalid: " + e);
+            }
             play(nextMusic);
         } else {
             System.out.println("Playlist finished.");
@@ -115,6 +141,8 @@ public class Player {
     }
 
     public void forward(int howMuch) {
+
+        // *** JAVAFX ***
         if (player == null) {
             System.out.println("No music to forward.");
             return;
@@ -250,5 +278,37 @@ public class Player {
 
     public static void setPlaylistSelectionMode(boolean val) {
         isSelecting.set(val);
+    }
+
+//    public void close() {
+//        if (nPlayer != null) {
+//            nPlayer.close();
+//        }
+//        minim.stop();
+//    }
+
+    public Path getCurrentMusic() {
+//        System.out.println("Getting the source...");
+//        System.out.println("The player is: " + player);
+        if (player == null) {
+            return null;
+        }
+        String source = player.getMedia().getSource();
+//        System.out.println("The source is: " + source);
+        return Paths.get(URI.create(source));
+    }
+
+    public Duration getTotalDuration() {
+        if (player == null) {
+            return null;
+        }
+        return player.getTotalDuration();
+    }
+
+    public Duration getCurrentTime() {
+        if (player == null) {
+            return null;
+        }
+        return player.getCurrentTime();
     }
 }

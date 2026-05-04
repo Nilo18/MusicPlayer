@@ -20,6 +20,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class Downloader {
+    private static boolean ytDlpUpdated = false;
+
     public static void downloadVideoYtDlp(String title, String url) {
         System.out.println("Downloading " + title + "...");
 
@@ -50,11 +52,32 @@ public class Downloader {
         String[] splitToken = url.split("id=");
         String id = splitToken[0];
         String ytUrl = "https://www.youtube.com/watch?v=" + id;
+//        System.out.println("ytUrl is: " + ytUrl);
+
+        if (!ytDlpUpdated) {
+            System.out.println("Checking for yt-dlp updates...");
+
+            try {
+                ProcessBuilder updatePb = new ProcessBuilder(ytDlp, "-U");
+                Process updateProcess = updatePb.inheritIO().start();
+                updateProcess.waitFor();
+                ytDlpUpdated = true;
+            } catch (IOException e) {
+                System.out.println("Couldn't start yt-dlp update process." + e);
+            } catch (InterruptedException e) {
+                System.out.println("Interruption during yt-dlp update. " + e);
+            } catch (Exception e) {
+                System.out.println("Unknown exception has occurred while trying to update yt-dlp: " + e);
+            }
+        }
 
         ProcessBuilder pb = new ProcessBuilder(
-                ytDlp, "-U", "--ffmpeg-location", ffmpeg,
+                ytDlp, "--ffmpeg-location", ffmpeg,
                 "--extract-audio",
                 "--audio-format", "mp3",
+                "--embed-thumbnail",        // adds album art
+                "--embed-metadata",         // embeds title, uploader, etc.
+                "--parse-metadata", "%(uploader)s:%(meta_artist)s",  // maps uploader → artist tag
                 "--output", outputPath,
                 ytUrl
         );

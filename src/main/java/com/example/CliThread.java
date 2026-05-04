@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CliThread implements Runnable {
@@ -32,101 +33,114 @@ public class CliThread implements Runnable {
            .toArray(String[]::new) collects the converted values into a new array
            String.join(" ") is used to join the strings with spaces between them
         */
-        CommandHandler.addCommand("mp play", Pattern.compile("^mp play -\"([^\"]+)\"$"),
+        CommandHandler.addCommand("play", Pattern.compile("^play -\"([^\"]+)\"$"),
                 (Object... option) ->
                 Searcher.search(String.join(" ", Arrays.stream(option)
                         .map(Object::toString)
                         .toArray(String[]::new)), 1L)
         );
         /* Shortcut command for playing */
-        CommandHandler.addCommand("mp p", Pattern.compile("^mp p -\"([^\"]+)\"$"),
+        CommandHandler.addCommand("p", Pattern.compile("^p -\"([^\"]+)\"$"),
                 (Object... option) ->
                         Searcher.search(String.join(" ", Arrays.stream(option)
                                 .map(Object::toString)
                                 .toArray(String[]::new)), 1L)
         );
-        CommandHandler.addCommand("mp search", Pattern.compile("^mp search -\"([^\"]+)\"$"),
+        CommandHandler.addCommand("search", Pattern.compile("^search -\"([^\"]+)\"$"),
                 (Object... option)  -> Searcher.search(String.join(" ", Arrays.stream(option)
                                 .map(Object::toString)
                                 .toArray(String[]::new)), 5L)
         );
         /* Shortcut command for searching */
-        CommandHandler.addCommand("mp se", Pattern.compile("^mp se -\"([^\"]+)\"$"),
+        CommandHandler.addCommand("se", Pattern.compile("^se -\"([^\"]+)\"$"),
                 (Object... option)  -> Searcher.search(String.join(" ", Arrays.stream(option)
                         .map(Object::toString)
                         .toArray(String[]::new)), 5L)
         );
-        CommandHandler.addCommand("mp forward", Pattern.compile("^mp forward -([^\"]+)$"),
+        CommandHandler.addCommand("forward", Pattern.compile("^forward -([^\"]+)$"),
                 (Object... option) ->
                 PlayerManager.forward(String.join(" ", Arrays.stream(option)
                         .map(Object::toString)
                         .toArray(String[]::new)))
         );
         /* Shortcut command for forwarding */
-        CommandHandler.addCommand("mp f", Pattern.compile("^mp f -([^\"]+)$"),
+        CommandHandler.addCommand("f", Pattern.compile("^f -([^\"]+)$"),
                 (Object... option) ->
                         PlayerManager.forward(String.join(" ", Arrays.stream(option)
                                 .map(Object::toString)
                                 .toArray(String[]::new)))
         );
-        CommandHandler.addCommand("mp rewind", Pattern.compile("^mp rewind -([^\"]+)$"),
+        CommandHandler.addCommand("rewind", Pattern.compile("^rewind -([^\"]+)$"),
                 (Object... option) ->
                         PlayerManager.rewind(String.join(" ", Arrays.stream(option)
                                 .map(Object::toString)
                                 .toArray(String[]::new)))
         );
         /* Shortcut command for rewinding */
-        CommandHandler.addCommand("mp r", Pattern.compile("^mp r -([^\"]+)$"),
+        CommandHandler.addCommand("r", Pattern.compile("^r -([^\"]+)$"),
                 (Object... option) ->
                         PlayerManager.rewind(String.join(" ", Arrays.stream(option)
                                 .map(Object::toString)
                                 .toArray(String[]::new)))
         );
         // Starting with ^ and ending with $ means that there are no arguments expected
-        CommandHandler.addCommand("mp loop", Pattern.compile("^mp loop$"),
+        CommandHandler.addCommand("loop", Pattern.compile("^loop$"),
                 (Object... a) -> Platform.runLater(PlayerManager::loop)
         );
-        CommandHandler.addCommand("mp l", Pattern.compile("^mp l$"),
+        CommandHandler.addCommand("l", Pattern.compile("^l$"),
                 (Object... a) -> Platform.runLater(PlayerManager::loop)
         );
-        CommandHandler.addCommand("mp skip", Pattern.compile("^mp skip$"),
+        CommandHandler.addCommand("skip", Pattern.compile("^skip$"),
                 (Object... a) -> PlayerManager.skip()
         );
-        CommandHandler.addCommand("mp s", Pattern.compile("^mp s$"),
+        CommandHandler.addCommand("s", Pattern.compile("^s$"),
                 (Object... a) -> PlayerManager.skip()
         );
-        CommandHandler.addCommand("mp previous", Pattern.compile("^mp previous$"),
+        CommandHandler.addCommand("previous", Pattern.compile("^previous$"),
                 (Object... a) -> PlayerManager.previous()
         );
-        CommandHandler.addCommand("mp prev", Pattern.compile("^mp prev$"),
+        CommandHandler.addCommand("prev", Pattern.compile("^prev$"),
                 (Object... a) -> PlayerManager.previous()
         );
-        CommandHandler.addCommand("mp pause", Pattern.compile("^mp pause$"),
+        CommandHandler.addCommand("pause", Pattern.compile("^pause$"),
             (Object... a) -> PlayerManager.pause()
         );
-        CommandHandler.addCommand("mp pa", Pattern.compile("^mp pa$"),
+        CommandHandler.addCommand("pa", Pattern.compile("^pa$"),
                 (Object... a) -> PlayerManager.pause()
         );
-        CommandHandler.addCommand("mp resume", Pattern.compile("^mp resume$"),
+        CommandHandler.addCommand("resume", Pattern.compile("^resume$"),
                 (Object... a) -> PlayerManager.resume()
         );
-        CommandHandler.addCommand("mp re", Pattern.compile("^mp re$"),
+        CommandHandler.addCommand("re", Pattern.compile("^re$"),
                 (Object... a) -> PlayerManager.resume()
         );
-        CommandHandler.addCommand("mp exit", Pattern.compile("^mp exit$"),
+        CommandHandler.addCommand("exit", Pattern.compile("^exit$"),
                 (Object... a) -> Utilities.exit(isRunning)
         );
-        CommandHandler.addCommand("mp e", Pattern.compile("^mp e$"),
+        CommandHandler.addCommand("e", Pattern.compile("^e$"),
                 (Object... a) -> Utilities.exit(isRunning)
         );
-        CommandHandler.addCommand("mp help", Pattern.compile("^mp help$"),
+        CommandHandler.addCommand("help", Pattern.compile("^help$"),
                 (Object... a) -> Utilities.showAllCommands()
         );
-        CommandHandler.addCommand("mp list", Pattern.compile("^mp list$"),
+        CommandHandler.addCommand("list", Pattern.compile("^list$"),
                 (Object... a) -> PlayerManager.showPlaylist()
         );
-        CommandHandler.addCommand("mp li", Pattern.compile("^mp li$"),
+        CommandHandler.addCommand("li", Pattern.compile("^li$"),
                 (Object... a) -> PlayerManager.showPlaylist()
+        );
+        CommandHandler.addCommand("duration", Pattern.compile("^duration$"),
+                (Object... a) -> Utilities.showDuration()
+        );
+        CommandHandler.addCommand("dur", Pattern.compile("^dur$"),
+                (Object... a) -> Utilities.showDuration()
+        );
+
+        CommandHandler.addCommand("remaining", Pattern.compile("^remaining$"),
+                (Object... a) -> Utilities.showRemainingTime()
+        );
+        CommandHandler.addCommand("rem", Pattern.compile("^rem$"),
+                (Object... a) -> Utilities.showRemainingTime()
         );
 
         while (isRunning.get()) {

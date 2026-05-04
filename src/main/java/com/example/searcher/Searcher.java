@@ -32,7 +32,9 @@ import org.jline.consoleui.prompt.builder.PromptBuilder;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.AttributedString;
 import org.jline.utils.InfoCmp;
+import org.jline.utils.Status;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -49,6 +51,7 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
         terminal.puts(InfoCmp.Capability.cursor_invisible);
         ConsolePrompt prompt = new ConsolePrompt(terminal);
         PromptBuilder builder = prompt.getPromptBuilder();
+        System.out.println();
         ListPromptBuilder listBuilder = builder.createListPrompt().
                 name("search").
                 message("Choose one of the 5 results:");
@@ -105,13 +108,37 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
                     "--quiet"
             );
             List<SearchResult> results = new ArrayList<>();
+//            System.out.println("Initialized the results array: " + results);
             try {
                 Process process = pb.start();
+//                System.out.println("Results array after starting the process: " + results);
+//                System.out.println("The process input stream is: " + process.getInputStream());
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));) {
                     String line;
+//                    System.out.println("Results array in try block: " + results);
+//                    System.out.println("The BufferedReader object is: " + reader);
+//                    System.out.println();
+//                    while (reader.readLine() != null) System.out.println("aah");
+                    System.out.println("Extracting metadata...");
+                    boolean notifierPrinted = false;
+                    int resultCount = 0;
+                    boolean scanning = true;
                     while ((line = reader.readLine()) != null) {
+//                        System.out.println("Found result, ");
+//                        System.out.println("AAAAAAA");
+//                        System.out.println("Results array in while loop: " + results);
+                        if (!notifierPrinted) {
+                            System.out.print("Scanning results: ");
+                            notifierPrinted = true;
+                        }
+                        if (resultCount <= 5) {
+                            resultCount++;
+                            System.out.print(resultCount + "...");
+                        }
                         String[] parts = line.split(" \\| ");
+//                        System.out.println("The parts are: " + Arrays.toString(parts));
                         if (parts.length >= 2) {
+//                            System.out.println("Adding to results array: " + parts[0] + " " + parts[1]);
                             results.add(new SearchResult(parts[0], parts[1]));
                         }
                     }
@@ -133,6 +160,7 @@ public static void activateSearchSelectionMode(List<SearchResult> results) {
                         Downloader.downloadVideoYtDlp(title, videoId);
                     }
                 } else {
+                    System.out.println("The results array is: " + results);
                     System.out.println("No such video was found.");
                 }
             } catch (IOException e) {

@@ -19,6 +19,7 @@ public class CommandHandler {
         // Loop over the commands and test the user input against the syntax
         // This ensures that syntax is always valid
         for (Command cmd : commands.values()) {
+//            System.out.println("Matching: " + cmd.syntax + " against " + command);
             Matcher matcher = cmd.syntax.matcher(command);
 
             if (matcher.matches()) {

@@ -1,5 +1,6 @@
 package com.example;
 
+import com.example.player.PlayerManager;
 import com.example.utilities.Color;
 import com.example.utilities.Utilities;
 import com.github.lalyos.jfiglet.FigletFont;
@@ -15,22 +16,22 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            String banner = FigletFont.convertOneLine("JXPlayer CLI v1.2.1");
+            String banner = FigletFont.convertOneLine("Cantante CLI v1.3.1");
             System.out.println(Color.RED + banner + Color.RESET);
         } catch (IOException e) {
             System.out.println("***************************");
-            System.out.println("JXPlayer CLI v1.2.1");
+            System.out.println("Cantante CLI v1.3.1");
             System.out.println("***************************");
         }
         System.out.println();
         System.out.println("Choose one of the main commands: ");
         System.out.println("""
-         1) mp play -"NAME OF THE SONG/YOUTUBE URL" --- Play the desired music, the music will be downloaded (if it isn't already installed) and played locally. Shortcut: mp p -"NAME OF THE SONG/YOUTUBE URL"
-         2) mp loop --- Loop the music which is currently playing. Shortcut: mp l
-         3) mp skip --- Skip the music which is playing currently. Shortcut: mp s
-         4) mp exit --- Exit the CLI. Shortcut: mp e
+         1) play -"NAME OF THE SONG/YOUTUBE URL" --- Play the desired music, the music will be downloaded (if it isn't already installed) and played locally. Shortcut: p -"NAME OF THE SONG/YOUTUBE URL"
+         2) loop --- Loop the music which is currently playing. Shortcut: l
+         3) skip --- Skip the music which is playing currently. Shortcut: s
+         4) exit --- Exit the CLI. Shortcut: mp e
          
-         Type mp help for a detailed list of commands.
+         Type help for a detailed list of commands.
          ************************************************************** \n
          """);
 
@@ -53,5 +54,6 @@ public class App extends Application {
             launch(args);
             return;
         }
+
     }
 }
